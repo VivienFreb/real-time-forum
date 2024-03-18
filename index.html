@@ -1,0 +1,76 @@
+		<!DOCTYPE html>
+		<html>
+        <link rel="stylesheet" type="text/css" href="static/styles.css">
+		<head>
+			<title>Simple Forum</title>
+		</head>
+		<body>
+			<!-- <h1 style="color: red;">Simple Forum</h1> -->
+            <div class="UserVerif">
+                <div id="register" class="wrapper">
+                    <form id="register-form" method="post" name="register-name">
+                        <input type="hidden" name="formName" value="register">
+                        <h1>R</h1>
+                        <div class="input-box">
+                            <input type="text" placeholder="Username" name="username" id="register-username" required>
+                        </div>
+                        <div class="input-box">
+                            <input type="text" placeholder="E-mail" name="mail" id="register-email" required>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" placeholder="Password" name="password" id="register-password" required>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" placeholder="Comfirm password" name="confirm_password" id="register-confirm-password" required>
+                        </div>
+                        <button type="submit" class="btn">Register</button>                       
+                        <div class="register-link">
+                            <p><a href="#" onclick="toggleForm('login')">Already a member? <br>Login now!</a></p>
+                        </div>
+                    </form>
+                </div>
+                <div id="login" class="wrapper hidden">
+                    <form action="/register">
+                        <h1>LOGIN</h1>
+                        <div class="input-box">
+                            <input type="text" placeholder="Username" name="username" id="login-username" required>
+                        </div>
+                        <div class="input-box">
+                            <input type="email" placeholder="E-mail" name="mail" id="login-mail" required>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" placeholder="Password" name="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn" onclick="NOPE()">Login</button>
+                        
+                        <div class="register-link">
+                            <p><a href="#" onclick="toggleForm('register')">Not a user yet?<br>Register here!</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+			<ul class="hidden">
+                {{range .}}
+                <li>
+                    <strong>{{.Title}}</strong><br>
+                    {{.Content}}<br>
+                    Created at: {{.CreatedAt}}
+                </li>
+				{{end}}
+			</ul>
+			<hr>
+            <div id="CreatePost" class="hidden">
+                <h2>Create a Post</h2>
+                <form action="/create" method="post">
+                    <label for="title">Title:</label>
+                    <input type="text" name="title" required><br>
+                    <label for="content">Content:</label>
+                    <textarea name="content" required></textarea><br>
+                    <input type="submit" value="Create Post">
+                </form>
+            </div>
+            <!-- <script src="script.js"></script> -->
+            
+		</body>
+		</html>
