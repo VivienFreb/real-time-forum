@@ -1,198 +1,151 @@
-// main.go
 package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
-	"regexp"
-	"time"
+	"os"
+	"path/filepath"
 
+	utils "real/assets/utils"
+
+	"github.com/gorilla/websocket"
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 var db *sql.DB
+
+type Denomination struct {
+	FormName string `json:"formName"`
+}
+type FormDataRegister struct {
+	FormName        string `json:"formName"`
+	Username        string `json:"username"`
+	Email           string `json:"mail"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
+type FormDataLogin struct {
+	FormName string `json:"formName"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
 func initDB() {
 	var err error
-	db, err = sql.Open("sqlite3", "forum.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create posts table
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS posts (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			title TEXT,
-			content TEXT,
-			created_at TIMESTAMP
-		)
-	`)
+	db, err = sql.Open("sqlite3", "./db/forum.sqlite")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-type Post struct {
-	ID        int
-	Title     string
-	Content   string
-	CreatedAt time.Time
+func loginHandler(conn *websocket.Conn, message []byte) {
+
+	var formData FormDataLogin
+	err := json.Unmarshal(message, &formData)
+	if err != nil {
+		fmt.Println("Erreur lors de l'analyse des données JSON:", err)
+		return
+	}
+
+	// Gérez les données du formulaire de connexion
+	fmt.Println("Données du formulaire de connexion:")
+	fmt.Println("Nom d'utilisateur:", formData.Username)
+	fmt.Println("Mot de passe:", formData.Password)
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println("je rentre")
+	// Upgrade de la connexion HTTP vers une connexion WebSocket
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Erreur lors de l'upgrade de la connexion WebSocket:", err)
+		return
+	}
+	defer conn.Close()
+	// fmt.Println("je rentre2")
+	// Boucle pour lire les messages WebSocket
+	for {
+		messageType, message, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("Erreur lors de la lecture du message WebSocket:", err)
+			break
+		}
+		// fmt.Printf("Données reçues du client: %s\n", message)
+		var nomForm Denomination
+		err = json.Unmarshal(message, &nomForm)
+		if err != nil {
+			fmt.Println("Erreur lors de l'analyse des données JSON:", err)
+			continue
+		}
+		// Traitez les données en fonction du nom du formulaire
+
+		fmt.Println("form", nomForm.FormName)
+		switch nomForm.FormName {
+		case "register":
+			registerHandler(conn, message)
+		case "login":
+			loginHandler(conn, message)
+		default:
+			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
+		}
+		responseMessage := []byte("Message reçu avec succès")
+		err = conn.WriteMessage(messageType, responseMessage)
+		if err != nil {
+			fmt.Println("Erreur lors de l'envoi du message de retour:", err)
+			break
+		}
+	}
 }
 
 func main() {
 	initDB()
+	fs := http.FileServer(http.Dir("assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	http.HandleFunc("/", defaultHandler)
+	http.HandleFunc("/ws", wsHandler)
+	fmt.Println("Serveur WebSocket démarré sur ws://localhost:8080/ws")
+	fmt.Println("Vrai serveur démarré sur http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
 	defer db.Close()
-
-	// http.HandleFunc("/", indexHandler)
-	// http.Handle("/", http.FileServer(http.Dir('.')))
-	http.Handle("/static/", http.StripPrefix("/static/",http.FileServer(http.Dir("static"))))
-	http.HandleFunc("/", ultimateHandler)
-	http.HandleFunc("/register", registerHandler)
-	http.HandleFunc("/styles.css", func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Content-Type", "text/css")
-        http.ServeFile(w, r, "styles.css")
-    })
-	// http.HandleFunc("/create", createHandler)
-	// http.HandleFunc("/login", loginHandler)
-
-
-	fmt.Println("Server is running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func ultimateHandler(w http.ResponseWriter, r *http.Request){
-	switch r.Method{
-	case http.MethodGet:
-		http.ServeFile(w, r, "index.html")
-	case http.MethodPost:
-		// path := r.URL.Path
-		// switch path{
-		// case "/register":
-		// 	registerHandler(w, r)
-		// case "/login":
-		// 	loginHandler(w,r)
-		// }
-		switch r.FormValue("formName"){
-		case "register":
-			registerHandler(w,r)
-		}
+func registerHandler(conn *websocket.Conn, message []byte) {
+	var formData FormDataRegister
+	err := json.Unmarshal(message, &formData)
+	if err != nil {
+		fmt.Println("Erreur lors de l'analyse des données JSON:", err)
+		return
 	}
+
+	// Utilisez les données du formulaire pour l'inscription
+	fmt.Println("Données du formulaire d'inscription:")
+	fmt.Println("Nom d'utilisateur:", formData.Username)
+	fmt.Println("E-mail:", formData.Email)
+	fmt.Println("Mot de passe:", formData.Password)
+	fmt.Println("Confirmation du mot de passe:", formData.ConfirmPassword)
+	utils.InsertUser(db, formData.Username, formData.Email, formData.Password, formData.ConfirmPassword)
 }
 
-func registerHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting the parse!")
-	//Parse form data???
-	// Vérifier que tout se déroule sans encombre d'un POV technique?
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	//Ici je récupère les valeurs pour les mettre dans des variables
-	username := r.Form.Get("username")
-	email := r.Form.Get("mail")
-	password := r.Form.Get("password")
-	confirmPassword := r.Form.Get("confirm_password")
-
-	log.Printf("Rec  eived form data - Username: %s, Email: %s, Password: %s, ConfirmPasword: %s", username, email, password, confirmPassword)
-
-	if username == "" || email == "" || password == "" || confirmPassword == "" {
-		http.Error(w, "Invalid Form Data", http.StatusBadRequest)
-		return
-	}
-
-	// Verif du mail avec du RegEx
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	if match, _ := regexp.MatchString(emailRegex, email); !match {
-		http.Error(w, "Invalid Email Format", http.StatusBadRequest)
-		return
-	}
-	// fmt.Println("Email templated!")
-
-	_, err = db.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", username, email, password)
-	if err != nil {
-		http.Error(w, "Failed to register user", http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w,r,"/",http.StatusFound)
-	fmt.Println("New user registered.")
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	servePage(w, r, "templates/index.html")
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Mauvaise méthode!", http.StatusMethodNotAllowed)
-		return
-	}
-
-	username := r.Form.Get("username")
-	password := r.Form.Get("password")
-
-	if username == "" || password == "" {
-		http.Error(w, "Invalid Form Data", http.StatusBadRequest)
-		return
-	}
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	posts, err := getPosts()
+func servePage(w http.ResponseWriter, r *http.Request, pageName string) {
+	wd, err := os.Getwd()
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	tmpl, err := template.ParseFiles("index.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, posts)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-}
-
-func createHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	title := r.FormValue("title")
-	content := r.FormValue("content")
-
-	_, err := db.Exec("INSERT INTO posts (title, content, created_at) VALUES (?, ?, ?)", title, content, time.Now())
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func getPosts() ([]Post, error) {
-	rows, err := db.Query("SELECT id, title, content, created_at FROM posts ORDER BY created_at DESC")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
+	pagePath := filepath.Join(wd, pageName)
+	http.ServeFile(w, r, pagePath)
 }

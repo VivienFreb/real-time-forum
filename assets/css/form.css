@@ -1,0 +1,134 @@
+* {
+    font-family: "Blood", sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* background: url('!!Amber\ Valley.jpg') no-repeat; */
+    background: url('../image/paysage1.webp') no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.wrapperform {
+    width: 420px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, .2);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+    /* color: #333; */
+    color: #1f842e;
+    border-radius: 10px;
+    padding: 30px 40px;
+}
+
+.wrapperform h1 {
+    font-size: 36px;
+    text-align: center;
+}
+
+.wrapperform .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.input-box input {
+    font-family: "Blood", sans-serif;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, .2);
+    border-radius: 40px;
+    font-size: 16px;
+    /* color: #333; */
+    color: #1f842e;
+    padding: 20px 45px 20px 20px;
+}
+
+.input-box input::placeholder {
+    /* color: #333; */
+    color: #1f842e;
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.wrapperform .remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: -15px 0 15px;
+}
+
+.remember-forgot label input {
+    /* accent-color: #333; */
+    accent-color: #1f842e;
+    margin-right: 3px;
+}
+.remember-forgot a {
+    /* color: #333; */
+    color: #1f842e;
+    text-decoration: none;
+}
+
+.remember-forgot a:hover {
+    text-decoration: underline;
+}
+
+.wrapperform .btn {
+    width: 100%;
+    height: 45px;
+    /* background: #333; */
+    background: #1f842e;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 600;
+}
+
+.wrapperform .register-link, .wrapperform .login-link {
+    font-size: 14.5px;
+    text-align: center;
+    margin: 20px 0 15px;
+}
+
+.register-link p a, .login-link p a {
+    /* color: #333; */
+    color: #1f842e;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link p a:hover, .login-link p a:hover {
+    text-decoration: underline;
+}
+
+i {
+    font-size: 50px;
+    text-decoration: none;
+    /* color: #333; */
+    color: #1f842e;
+}
+
+/* .hidden{
+    display: none;
+} */

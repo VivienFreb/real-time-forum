@@ -1,0 +1,67 @@
+<!-- inscription.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/form.css">
+</head>
+<body>
+    <div id="content_inscription" class="inscription wrapper">
+        <!-- Formulaire d'inscription -->
+        <div id="register" class="wrapperform">
+            <form id="registrationForm" method="post">
+                    <input type="hidden" name="formName" value="register">
+                    <h1>REGISTER</h1>
+                    <div class="input-box">
+                        <input type="text" placeholder="Username" name="username" id="register_username" required>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" placeholder="E-mail" name="mail" id="register_email" required>
+                    </div>
+                    <div class="input-box">
+                        <input type="password" placeholder="Password" name="password" id="register_password" required>
+                    </div>
+                    <div class="input-box">
+                        <input type="password" placeholder="Comfirm password" name="confirm_password" id="register_confirm_password" required>
+                    </div>
+                    <button id="registrationBtn" class="btn">Register</button>                       
+                    <div class="register-link">
+                        <p><a href="#" id="showLoginPage">Already a member? <br>Login now!</a></p>
+                    </div>
+            </form>
+        </div>
+        <!-- <button id="showDashboard">Tableau de bord</button> -->
+    </div>
+    <div id="content_login" class="login">
+        <!-- Formulaire de connexion -->
+        <div id="login" class="wrapperform">
+            <form id="loginForm">
+                <input type="hidden" name="formName" value="login">
+                <h1>LOGIN</h1>
+                <div class="input-box">
+                    <input type="text" placeholder="Username" name="username" id="login_username" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" placeholder="Password" name="password" id="login_password" required>
+                </div>
+                    <button id="loginBtn" class="btn">Register</button>                       
+                <div class="login-link">
+                    <p><a href="#" id="showRegistrationPage">not a member? <br>Register now!</a></p>
+                </div>
+            </form>
+        </div>
+        <!-- <button id="showRegistrationPage">Page d'inscription</button> -->
+        <button id="showDashboard">Tableau de bord</button>
+    </div>
+    <div id="content_dashboard" class="dashboard wrapper">
+        <h2>Tableau de bord</h2>
+        <!-- Contenu du tableau de bord -->
+        <p>Bienvenue sur votre tableau de bord.</p>
+        <button id="logout">Déconnexion</button>
+    </div>
+<script src="/assets/js/script.js"></script>
+</body>
+</html>
