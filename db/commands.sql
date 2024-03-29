@@ -7,4 +7,4 @@
 
 -- CREATE TABLE IF NOT EXISTS Users (username TEXT, email TEXT, password TEXT )
 
-DELETE FROM Users;
+DElETE FROM `Users`
