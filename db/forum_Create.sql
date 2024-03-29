@@ -14,9 +14,7 @@ CREATE TABLE IF NOT EXISTS `Categories` (
 CREATE TABLE IF NOT EXISTS `Posts` (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title VARCHAR(255) NOT NULL,
-    imgUrl TEXT,
     description TEXT NOT NULL,
-    date date NOT NULL,
     user_id INTEGER NOT NULL,
 
     FOREIGN KEY (user_id ) references Users(id)

@@ -5,10 +5,6 @@ import "fmt"
 type Comment struct {
 	ID      int
 	Message string
-	// Date    time.Time
-	Likes       int
-	Dislikes    int
-	Date        string
 	Pseudo      string
 	User_id     int
 	SubComments []*Comment // store sub comments
@@ -21,8 +17,6 @@ func (c *Comment) Update(
 	dislikes int,
 ) {
 	c.Message = message
-	c.Likes = likes
-	c.Dislikes = dislikes
 }
 
 func GetComment(id int, comments []*Comment) *Comment {

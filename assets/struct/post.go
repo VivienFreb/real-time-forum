@@ -3,11 +3,8 @@ package real
 type Post struct {
 	ID          int
 	Title       string
-	ImgUrl      string
 	Description string
 	Date        string
-	Likes       int
-	Dislikes    int
 	Comments    int
 	User_id     int
 	Pseudo      string
@@ -21,8 +18,6 @@ type MyPost struct{
 	Comments int
 }
 
-// Builder
-// Create a new Post
 func NewPost(
 	id int,
 	title string,
@@ -39,11 +34,8 @@ func NewPost(
 	return Post{
 		ID:          id,
 		Title:       title,
-		ImgUrl:      imgUrl,
 		Description: description,
 		Date:        date,
-		Likes:       likes,
-		Dislikes:    dislikes,
 		User_id:     user_id,
 	}
 }
@@ -57,6 +49,4 @@ func (p *Post) Update(
 ) {
 	p.Title = title
 	p.Description = description
-	p.Likes = likes
-	p.Dislikes = dislikes
 }

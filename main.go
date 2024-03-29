@@ -47,6 +47,21 @@ func initDB() {
 	}
 }
 
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	servePage(w, r, "templates/index.html")
+}
+
+func servePage(w http.ResponseWriter, r *http.Request, pageName string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	pagePath := filepath.Join(wd, pageName)
+	http.ServeFile(w, r, pagePath)
+}
+
 func loginHandler(conn *websocket.Conn, message []byte) {
 
 	var formData FormDataLogin
@@ -63,7 +78,6 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Println("je rentre")
 	// Upgrade de la connexion HTTP vers une connexion WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -79,7 +93,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Erreur lors de la lecture du message WebSocket:", err)
 			break
 		}
-		// fmt.Printf("Données reçues du client: %s\n", message)
 		var nomForm Denomination
 		err = json.Unmarshal(message, &nomForm)
 		if err != nil {
@@ -94,16 +107,28 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			registerHandler(conn, message)
 		case "login":
 			loginHandler(conn, message)
+		case "posts":
+			sendPostsToClients(conn)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
-		responseMessage := []byte("Message reçu avec succès")
+		responseMessage := []byte("Message reçu avec succès");
 		err = conn.WriteMessage(messageType, responseMessage)
 		if err != nil {
 			fmt.Println("Erreur lors de l'envoi du message de retour:", err)
 			break
 		}
 	}
+}
+
+func registerHandler(conn *websocket.Conn, message []byte){
+	var formData FormDataRegister
+	err := json.Unmarshal(message, &formData)
+	if err != nil {
+		fmt.Println("Erreur lors de l'analyse des données JSON:", err)
+		return
+	}
+	utils.InsertUser(db, formData.Username, formData.Email, formData.Password, formData.ConfirmPassword)
 }
 
 func main() {
@@ -118,34 +143,16 @@ func main() {
 	defer db.Close()
 }
 
-func registerHandler(conn *websocket.Conn, message []byte) {
-	var formData FormDataRegister
-	err := json.Unmarshal(message, &formData)
-	if err != nil {
-		fmt.Println("Erreur lors de l'analyse des données JSON:", err)
+func sendPostsToClients(conn *websocket.Conn){
+	posts,err := utils.GetPosts(db)
+	if err != nil{
+		fmt.Println("Erreur lors de la function sendPostsToClients!")
 		return
 	}
-
-	// Utilisez les données du formulaire pour l'inscription
-	fmt.Println("Données du formulaire d'inscription:")
-	fmt.Println("Nom d'utilisateur:", formData.Username)
-	fmt.Println("E-mail:", formData.Email)
-	fmt.Println("Mot de passe:", formData.Password)
-	fmt.Println("Confirmation du mot de passe:", formData.ConfirmPassword)
-	utils.InsertUser(db, formData.Username, formData.Email, formData.Password, formData.ConfirmPassword)
-}
-
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
-	servePage(w, r, "templates/index.html")
-}
-
-func servePage(w http.ResponseWriter, r *http.Request, pageName string) {
-	wd, err := os.Getwd()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	postData, _ := json.Marshal(posts)
+	err = conn.WriteMessage(websocket.TextMessage, postData)
+	if err != nil{
+		fmt.Println("Erreur pour renvoyer les données vers le JS!")
 		return
 	}
-
-	pagePath := filepath.Join(wd, pageName)
-	http.ServeFile(w, r, pagePath)
 }

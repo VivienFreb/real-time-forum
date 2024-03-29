@@ -1,4 +1,4 @@
-let inscription_page = document.getElementById("content_inscription");
+        let inscription_page = document.getElementById("content_inscription");
         let login_page = document.getElementById("content_login");
         let dashboard_page = document.getElementById("content_dashboard");
 
@@ -18,36 +18,48 @@ let inscription_page = document.getElementById("content_inscription");
 
     
         document.getElementById('showLoginPage').addEventListener('click', function() {
-            inscription_page.classList.add("wrapper");
-            login_page.classList.remove("wrapper");
-            dashboard_page.classList.add("wrapper");
+            inscription_page.classList.add("hidden");
+            login_page.classList.remove("hidden");
+            dashboard_page.classList.add("hidden");
         });
         document.getElementById('showDashboard').addEventListener('click', function() {
-            inscription_page.classList.add("wrapper");
-            login_page.classList.add("wrapper");
-            dashboard_page.classList.remove("wrapper");
+            inscription_page.classList.add("hidden");
+            login_page.classList.add("hidden");
+            dashboard_page.classList.remove("hidden");
         });
         document.getElementById('showRegistrationPage').addEventListener('click', function() {
-            inscription_page.classList.remove("wrapper");
-            login_page.classList.add("wrapper");
-            dashboard_page.classList.add("wrapper");
+            inscription_page.classList.remove("hidden");
+            login_page.classList.add("hidden");
+            dashboard_page.classList.add("hidden");
         });
-        document.getElementById('logout').addEventListener('click', function() {
-            inscription_page.classList.add("wrapper");
-            login_page.classList.remove("wrapper");
-            dashboard_page.classList.add("wrapper");
-        });
+        // document.getElementById('logout').addEventListener('click', function() {
+        //     inscription_page.classList.add("hidden");
+        //     login_page.classList.remove("hidden");
+        //     dashboard_page.classList.add("hidden");
+        // });
+
+        function initWebSocket() 
+        {
+            const socket = new WebSocket('ws://localhost:8080/ws');
+        
+            socket.addEventListener('open', function (event) {
+                console.log('WebSocket connection established');
+            });
+        
+            socket.addEventListener('message', function (event) {
+                console.log('Message received from server:', event.data);
+                // Handle incoming messages as needed
+            });
+        
+            return socket;
+        }
+
     
-        const socket = new WebSocket('ws://localhost:8080/ws');
+        const socket = initWebSocket();
 
         socket.addEventListener('open', function (event) {
             console.log('Connexion WebSocket établie');
         });
-
-        socket.addEventListener('message', function (event) {
-            console.log('Message reçu du serveur:', event.data);
-        });
-
         
         registerBtn.addEventListener('click', function (event) {
             event.preventDefault(); // Empêche la soumission normale du formulaire
@@ -57,6 +69,7 @@ let inscription_page = document.getElementById("content_inscription");
                 alert("L'un des champs requis est vide.")
                 return
             }
+            console.log(registerForm);
             const formData = new FormData(registerForm);
 
             // Convertir FormData en objet JSON
@@ -71,6 +84,11 @@ let inscription_page = document.getElementById("content_inscription");
             document.getElementById('register_email').value = null;
             document.getElementById('register_password').value = null;
             document.getElementById('register_confirm_password').value = null;
+            document.getElementById('User-Verif').classList.add('hidden')
+            document.getElementById('content_dashboard').classList.remove('hidden')
+            // displayPosts()
+            // socket.close()
+            // initWebSocket()
         });
         loginBtn.addEventListener('click', function (event) {
             event.preventDefault(); // Empêche la soumission normale du formulaire
@@ -90,4 +108,19 @@ let inscription_page = document.getElementById("content_inscription");
             socket.send(JSON.stringify(data));
             login_username.value = 'Username';
             login_password.value = 'Password';
+            socket.close()
+            socket = initWebSocket()
         });
+
+        // function displayPosts(posts) {
+        //     const dashboardContent = document.getElementById('content_dashboard')
+        //     const postsList = document.createElement('ul')
+
+        //     posts.forEach(post =>{
+        //         const listItem = document.createElement('li')
+        //         listItem.textContent = `${post.title} - ${post.date} - ${post.description}`;
+        //         postsList.appendChild(listItem)
+        //     })
+        //     dashboardContent.innerHTML = '';
+        //     dashboardContent.appendChild(postsList)
+        // }
