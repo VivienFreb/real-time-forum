@@ -222,6 +222,21 @@ func InsertUser(db *sql.DB, username string, email string, password string, conf
 	}
 }
 
+func GetUserByUsername(db *sql.DB, username string) (*s.User, error) {
+	query := "SELECT id, username, email, password FROM users WHERE username = ?"
+	row := db.QueryRow(query, username)
+
+	user := &s.User{}
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("impossible de trouver l'user par son nom:%v", err)
+	}
+	return user, nil
+}
+
 func GetPosts(db *sql.DB) ([]*s.Post, error) {
 	_, err := db.Exec("SELECT * FROM Posts")
 	if err != nil {

@@ -1,4 +1,4 @@
-package real
+package utils
 
 type HeaderHandler struct {
 	IsLogged bool
@@ -17,5 +17,13 @@ type FilterHandler struct {
 }
 type User struct {
 	ID     int    `json:"id"`
-	Pseudo string `json:"pseudo"`
+	Username string `json:"username"`
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct{
+	Name string `json:"Name"`
+	Success bool `json:"Success"`
+	Message string `json:"Message"`
 }

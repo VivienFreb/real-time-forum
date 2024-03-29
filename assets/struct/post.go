@@ -1,4 +1,4 @@
-package real
+package utils
 
 type Post struct {
 	ID          int

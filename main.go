@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	trek "real/assets/struct"
 	utils "real/assets/utils"
 
 	"github.com/gorilla/websocket"
@@ -75,6 +76,40 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 	fmt.Println("Données du formulaire de connexion:")
 	fmt.Println("Nom d'utilisateur:", formData.Username)
 	fmt.Println("Mot de passe:", formData.Password)
+
+	user, err := utils.GetUserByUsername(db, formData.Username)
+	if err != nil {
+		fmt.Printf("Can't find %s in the database.", formData.Username)
+	}
+
+	if user != nil && user.Password == formData.Password {
+		fmt.Printf("%s was successfully logged.\n", user.Username)
+
+		response := trek.LoginResponse{Success: true, Message: "Everything is fine.", Name: "Login"}
+		responseData, err := json.Marshal(response)
+		fmt.Println(string(responseData))
+		if err != nil {
+			fmt.Println("Problème pour tout remettre en JSON.")
+			return
+		}
+		err = conn.WriteMessage(websocket.TextMessage, responseData)
+		if err != nil {
+			fmt.Println("Problème pour l'envoi du JSON vers le script.")
+			return
+		}
+	} else {
+		fmt.Println("Impossible de se connecter avec ce pseudo.")
+		response := trek.LoginResponse{Success: false, Message:"Nom ou MDP invalide.",Name: "Login"}
+		responseData, err := json.Marshal(response)
+		if err != nil{
+			fmt.Println("Erreur pour recompiler le message d'échec en JSON.")
+			return
+		}
+		err = conn.WriteMessage(websocket.TextMessage, responseData)
+		if err != nil{
+			fmt.Println("Erreur lors du renvoi du JSON d'erreur dans le script.")
+		}
+	}
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +123,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("je rentre2")
 	// Boucle pour lire les messages WebSocket
 	for {
-		messageType, message, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Erreur lors de la lecture du message WebSocket:", err)
 			break
@@ -112,16 +147,10 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
-		responseMessage := []byte("Message reçu avec succès");
-		err = conn.WriteMessage(messageType, responseMessage)
-		if err != nil {
-			fmt.Println("Erreur lors de l'envoi du message de retour:", err)
-			break
-		}
 	}
 }
 
-func registerHandler(conn *websocket.Conn, message []byte){
+func registerHandler(conn *websocket.Conn, message []byte) {
 	var formData FormDataRegister
 	err := json.Unmarshal(message, &formData)
 	if err != nil {
@@ -143,15 +172,15 @@ func main() {
 	defer db.Close()
 }
 
-func sendPostsToClients(conn *websocket.Conn){
-	posts,err := utils.GetPosts(db)
-	if err != nil{
+func sendPostsToClients(conn *websocket.Conn) {
+	posts, err := utils.GetPosts(db)
+	if err != nil {
 		fmt.Println("Erreur lors de la function sendPostsToClients!")
 		return
 	}
 	postData, _ := json.Marshal(posts)
 	err = conn.WriteMessage(websocket.TextMessage, postData)
-	if err != nil{
+	if err != nil {
 		fmt.Println("Erreur pour renvoyer les données vers le JS!")
 		return
 	}

@@ -1,4 +1,4 @@
-package real
+package utils
 
 const (
 	PathTemplate = "asset/html/"
