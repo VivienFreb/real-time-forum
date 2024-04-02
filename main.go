@@ -175,9 +175,10 @@ func main() {
 func sendPostsToClients(conn *websocket.Conn) {
 	posts, err := utils.GetPosts(db)
 	if err != nil {
-		fmt.Println("Erreur lors de la function sendPostsToClients!")
+		fmt.Println("Erreur pour chopper les données de GetPosts()!")
 		return
 	}
+	// fmt.Println(posts)
 	postData, _ := json.Marshal(posts)
 	err = conn.WriteMessage(websocket.TextMessage, postData)
 	if err != nil {

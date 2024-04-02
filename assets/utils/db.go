@@ -3,8 +3,6 @@ package utils
 import (
 	"database/sql"
 	"fmt"
-	"strings"
-	"time"
 
 	s "real/assets/struct"
 
@@ -12,62 +10,8 @@ import (
 )
 
 // Get All post from database
-func SelectAllPosts(db *sql.DB) []*s.Post {
-	var Date time.Time
-	// Variables declaration
-	var Posts []*s.Post
-	// execute query to get all posts from database
-	rows, err := db.Query("SELECT * FROM Posts ORDER BY date DESC")
-	if err != nil {
-		fmt.Errorf("Error Query:", err, 2)
-	}
-	defer rows.Close()
-	// Read all posts rows get from database
-	for rows.Next() {
-		var post s.Post
-		err = rows.Scan(&post.ID, &post.Title, &post.Description, &Date, &post.User_id)
-		if err != nil {
-			fmt.Errorf("Error Row:", err, 2)
-		}
-		post.Date = Date.Format("02-01-2006 15:04:06")
-		// Get Post Reaction
-		// fmt.Println("a", post.Name, post.Likes, post.Dislikes)
-		// Get Pseudo Creator of post
-		post.Pseudo = strings.Title(SelectPseudo(db, post.User_id))
-
-		Posts = append(Posts, &post)
-
-	}
-	return Posts
-}
 
 // Get One post from database, thanks to Connexion Cookie --> id_user
-func SelectPost(db *sql.DB, id int) *s.Post {
-	// Variables declaration
-	var post s.Post
-	var Date time.Time
-	// execute query to get all posts from database
-	rows, err := db.Query("SELECT * FROM Posts WHERE id = ?", id)
-	if err != nil {
-		fmt.Errorf("Error Query:", err, 2)
-	}
-	defer rows.Close()
-	// Read all posts rows get from database
-	for rows.Next() {
-		err = rows.Scan(&post.ID, &post.Title, &post.Description, &Date, &post.User_id)
-		if err != nil {
-			fmt.Errorf("Error Row:", err, 2)
-		}
-
-		post.Date = Date.Format("02-01-2006 15:04:06")
-
-		// Get Post Reaction
-		// fmt.Println("a", post.Name, post.Likes, post.Dislikes)
-		// Get Pseudo Creator of post
-		post.Pseudo = strings.Title(SelectPseudo(db, post.User_id))
-	}
-	return &post
-}
 
 // Insert a New Post on the database
 func InsertPost(db *sql.DB, title string, text string, user int, date string, img string) (int, error) {
@@ -237,20 +181,20 @@ func GetUserByUsername(db *sql.DB, username string) (*s.User, error) {
 	return user, nil
 }
 
-func GetPosts(db *sql.DB) ([]*s.Post, error) {
+func GetPosts(db *sql.DB) ([]s.Post, error) {
 	_, err := db.Exec("SELECT * FROM Posts")
 	if err != nil {
 		fmt.Println("Erreur pour chopper les posts.")
 	}
-	rows, err := db.Query("SELECT ID, Title, Description, Date, User_ID FROM Posts")
+	rows, err := db.Query("SELECT id, title, description, user_id FROM Posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve posts: %v", err)
 	}
 	defer rows.Close()
 
-	var posts []*s.Post
+	var posts []s.Post
 	for rows.Next() {
-		var post *s.Post
+		post := s.Post{}
 		err := rows.Scan(&post.ID, &post.Title, &post.Description, &post.User_id)
 		if err != nil {
 			return nil, fmt.Errorf("echec lors du scan des colonnes: %v", err)

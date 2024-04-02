@@ -4,7 +4,6 @@ type Post struct {
 	ID          int
 	Title       string
 	Description string
-	Date        string
 	Comments    int
 	User_id     int
 	Pseudo      string
@@ -35,7 +34,6 @@ func NewPost(
 		ID:          id,
 		Title:       title,
 		Description: description,
-		Date:        date,
 		User_id:     user_id,
 	}
 }

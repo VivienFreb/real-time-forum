@@ -20,10 +20,10 @@ func FilterTemplate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// }
 }
 func GetComment(comments []*s.Comment, id int) *s.Comment {
-	// for _, comment := range comments {
-	// 	if comment.ID == id {
-	// 		return comment
-	// 	}
-	// }
+	for _, comment := range comments {
+		if comment.ID == id {
+			return comment
+		}
+	}
 	return nil
 }

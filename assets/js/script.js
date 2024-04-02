@@ -113,6 +113,9 @@
                         alert("Identification échoué. Êtes-vous sûr d'être dans la base de donnée?")
                         return
                      }
+                case "Posts":
+                    console.log("Here is the result below;");
+                    displayPosts(response)
             }
         })
 
@@ -123,11 +126,11 @@
 
             posts.forEach(post =>{
                 const listItem = document.createElement('li')
-                listItem.textContent = `${post.title} - ${post.user_id} - ${post.description}`;
+                listItem.textContent = `${post.Title} - ${post.User_id} - ${post.Description}`;
                 postsList.appendChild(listItem)
             })
             dashboardContent.innerHTML = '';
             dashboardContent.appendChild(postsList)
         }
 
-        const requestsPosts = () => {message = {FormName: "Posts"};socket.send(JSON.stringify(message))}
+        const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
