@@ -98,32 +98,27 @@
             socket.send(JSON.stringify(data));
             login_username.value = '';
             login_password.value = '';
+            requestsPosts()
         });
 
         socket.addEventListener('message', function(event){
             const response = JSON.parse(event.data)
             console.log(response);
-            switch (response.Name){
-                case "Login":
+            if (response && response.Name){
+                if (response.Name == "Login")
                      if (response.Success){
                         document.getElementById('User-Verif').classList.add('hidden')
                         document.getElementById('content_dashboard').classList.remove('hidden')
-                        requestsPosts()
-                     } else {
-                        alert("Identification échoué. Êtes-vous sûr d'être dans la base de donnée?")
-                        return
-                     }
-                case "Posts":
-                    console.log("Here is the result below;");
-                    displayPosts(response)
+                        console.log("Coucou, je rentre dans LOGIN ");
+                     } 
+            } else if (Array.isArray(response)){
+                        displayPosts(response)
             }
         })
 
         function displayPosts(posts) {
             const dashboardContent = document.getElementById('content_dashboard')
             const postsList = document.createElement('ul')
-            console.log(posts);
-
             posts.forEach(post =>{
                 const listItem = document.createElement('li')
                 listItem.textContent = `${post.Title} - ${post.User_id} - ${post.Description}`;

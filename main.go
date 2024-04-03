@@ -178,7 +178,7 @@ func sendPostsToClients(conn *websocket.Conn) {
 		fmt.Println("Erreur pour chopper les données de GetPosts()!")
 		return
 	}
-	// fmt.Println(posts)
+	fmt.Println(posts)
 	postData, _ := json.Marshal(posts)
 	err = conn.WriteMessage(websocket.TextMessage, postData)
 	if err != nil {
