@@ -144,6 +144,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			loginHandler(conn, message)
 		case "posts":
 			sendPostsToClients(conn)
+		case "reset":
+			utils.Reboot(db)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}

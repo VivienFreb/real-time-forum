@@ -1,8 +1,8 @@
 -- database: ./forum.sqlite
 
 -- Users
-INSERT INTO `Users`(username , email , password) VALUES ("DaBoi27","DaBoi@gmx.fr","DaBoi10@");
-INSERT INTO `Users`(username , email , password) VALUES ("Bento-chan","shizuka@gmx.fr","Bento10@");
+INSERT INTO `Users`(username , email , password, status) VALUES ("DaBoi27","DaBoi@gmx.fr","DaBoi10@","inactive");
+INSERT INTO `Users`(username , email , password, status) VALUES ("Bento-chan","shizuka@gmx.fr","Bento10@","inactive");
 -- Posts
 INSERT INTO Posts (title,description,user_id) 
 VALUES (

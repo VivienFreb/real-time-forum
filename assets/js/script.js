@@ -39,6 +39,7 @@
         
             socket.addEventListener('open', function (event) {
                 console.log('WebSocket connection established');
+                rebootStatus()
             });
         
             return socket;
@@ -129,3 +130,4 @@
         }
 
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
+        const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}

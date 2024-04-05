@@ -207,3 +207,10 @@ func GetPosts(db *sql.DB) ([]s.Post, error) {
 	}
 	return posts, nil
 }
+
+func Reboot(db *sql.DB){
+	_, err:= db.Exec("UPDATE Users SET status = 'inactive'")
+	if err != nil{
+		fmt.Println("Impossible de reset les membres actifs.")
+	}
+}
