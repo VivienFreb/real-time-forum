@@ -208,9 +208,54 @@ func GetPosts(db *sql.DB) ([]s.Post, error) {
 	return posts, nil
 }
 
-func Reboot(db *sql.DB){
-	_, err:= db.Exec("UPDATE Users SET status = 'inactive'")
-	if err != nil{
+func Reboot(db *sql.DB) {
+	_, err := db.Exec("UPDATE Users SET status = 'inactive'")
+	if err != nil {
 		fmt.Println("Impossible de reset les membres actifs.")
 	}
+}
+
+func GetFriends(db *sql.DB, currentUser string) ([]s.User, error) {
+	rows, err := db.Query("SELECT username, id, email, status FROM Users WHERE username != ?", currentUser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve users: %v", err)
+	}
+	defer rows.Close()
+
+	var userList []s.User
+	for rows.Next() {
+		var user s.User
+		if err := rows.Scan(&user.Username, &user.ID, &user.Email, &user.Status); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %v", err)
+		}
+		userList = append(userList, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during iteration: %v", err)
+	}
+
+	return userList, nil
+}
+
+func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
+	rows, err := db.Query("SELECT username, status FROM Users where username != ?", currentUser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve status: %v", err)
+	}
+	defer rows.Close()
+	var statusList []s.Update
+	for rows.Next() {
+		var statue s.Update
+		if err := rows.Scan(&statue.Name, statue.Status); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %v", err)
+		}
+		statusList = append(statusList, statue)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during iteration: %v", err)
+	}
+
+	return statusList, nil
 }

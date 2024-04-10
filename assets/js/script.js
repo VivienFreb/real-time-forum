@@ -14,6 +14,8 @@
         let login_username = document.getElementById('login_username');
         let login_password = document.getElementById('login_password')
 
+        let currentUser;
+
 
 
     
@@ -94,11 +96,14 @@
             formData.forEach((value, key) => {
                 data[key] = value;
             });
+            data.username = login_username.value
 
             // Envoyer les données via WebSocket
             socket.send(JSON.stringify(data));
+            currentUser = login_username.value;
             login_username.value = '';
             login_password.value = '';
+            getUsers()
             requestsPosts()
         });
 
@@ -111,10 +116,22 @@
                         document.getElementById('User-Verif').classList.add('hidden')
                         document.getElementById('content_dashboard').classList.remove('hidden')
                         console.log("Coucou, je rentre dans LOGIN ");
-                     } 
-            } else if (Array.isArray(response)){
-                        displayPosts(response)
-            }
+                     }
+                if (response.Name === "Friends"){
+                    console.log("This is the friends list:\n",response.Ray);
+                    const friendList = response.Users;
+                    const me = document.createElement('h4')
+                    me.textContent = currentUser
+                    me.style = "color: blue"
+                    document.getElementById('MyName').appendChild(me)
+                    friendList.forEach(user =>{
+                        const li = document.createElement('li')
+                        li.textContent = user.username
+                        li.style.color = "white"
+                        document.getElementById('userList').appendChild(li)
+                    })
+                } 
+            } 
         })
 
         function displayPosts(posts) {
@@ -131,3 +148,7 @@
 
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
+        const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
+        const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
+
+        setInterval(getUsers, 400)

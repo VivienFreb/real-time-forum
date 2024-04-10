@@ -25,6 +25,7 @@ var db *sql.DB
 
 type Denomination struct {
 	FormName string `json:"formName"`
+	Username string `json:"Username"`
 }
 type FormDataRegister struct {
 	FormName        string `json:"formName"`
@@ -136,7 +137,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// Traitez les données en fonction du nom du formulaire
 
-		fmt.Println("form", nomForm.FormName)
+		fmt.Println("form", nomForm.FormName, nomForm.Username)
 		switch nomForm.FormName {
 		case "register":
 			registerHandler(conn, message)
@@ -146,6 +147,33 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			sendPostsToClients(conn)
 		case "reset":
 			utils.Reboot(db)
+		case "usershunt":
+			friends, err := utils.GetFriends(db, nomForm.Username)
+			if err != nil {
+				fmt.Println("Error getting friends:", err)
+				return
+			}
+			messageData := trek.AllMyFellas{Name: "Friends", Users: friends}
+			message, _ := json.Marshal(messageData)
+			err = conn.WriteMessage(websocket.TextMessage, message)
+			fmt.Println(friends)
+			if err != nil {
+				fmt.Println("Error sending friends list:", err)
+				return
+			}
+		case "userStatus":
+			update, err := utils.GetStatus(db, nomForm.Username)
+			if err != nil {
+				fmt.Println("Error updating status:", err)
+				return
+			}
+			messageData := trek.NewStatus{Name: "userStatus", Checks: update}
+			message, _ := json.Marshal(messageData)
+			err = conn.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				fmt.Println("Error sending friends list:", err)
+				return
+			}
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
