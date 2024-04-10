@@ -247,7 +247,7 @@ func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
 	var statusList []s.Update
 	for rows.Next() {
 		var statue s.Update
-		if err := rows.Scan(&statue.Name, statue.Status); err != nil {
+		if err := rows.Scan(&statue.Name, &statue.Status); err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
 		statusList = append(statusList, statue)

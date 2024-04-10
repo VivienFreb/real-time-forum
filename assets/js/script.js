@@ -105,6 +105,7 @@
             login_password.value = '';
             getUsers()
             requestsPosts()
+            // getStatus()
         });
 
         socket.addEventListener('message', function(event){
@@ -130,6 +131,10 @@
                         li.style.color = "white"
                         document.getElementById('userList').appendChild(li)
                     })
+                }
+                if (response.Name === "userStatus"){
+                    // console.log(response);
+                    updateUserStatus(response.Checks)
                 } 
             } 
         })
@@ -146,9 +151,22 @@
             dashboardContent.appendChild(postsList)
         }
 
+        function updateUserStatus(userStatus){
+            const userList = document.getElementById('userList')
+            userList.innerHTML = ''
+            console.log(userStatus);
+
+            userStatus.forEach(user =>{
+                const li = document.createElement('li');
+                li.textContent = `${user.Name}`;
+                li.style.color = user.status === 'active' ? 'green' : 'red';
+                userList.appendChild(li);
+            })
+        }
+
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
         const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
-
-        setInterval(getUsers, 400)
+        setInterval(getStatus, 10000)
+        // getStatus()
