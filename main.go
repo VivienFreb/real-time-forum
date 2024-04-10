@@ -85,6 +85,7 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 
 	if user != nil && user.Password == formData.Password {
 		fmt.Printf("%s was successfully logged.\n", user.Username)
+		utils.Activation(db, formData.Username)
 
 		response := trek.LoginResponse{Success: true, Message: "Everything is fine.", Name: "Login"}
 		responseData, err := json.Marshal(response)
@@ -113,14 +114,30 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 	}
 }
 
+var activeConn int 
+
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade de la connexion HTTP vers une connexion WebSocket
+	activeConn++
+	utils.Deactivation(db)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Erreur lors de l'upgrade de la connexion WebSocket:", err)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+        // Decrement the activeConnections counter when the connection is closed
+        activeConn--
+        // Check if there are no more active connections
+        if activeConn == 0 {
+            // Perform deactivation logic when there are no active connections
+            err := utils.Deactivation(db)
+            if err != nil {
+                fmt.Println("Error deactivating all users:", err)
+            }
+        }
+        conn.Close()
+    }()
 	// fmt.Println("je rentre2")
 	// Boucle pour lire les messages WebSocket
 	for {
@@ -156,7 +173,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			messageData := trek.AllMyFellas{Name: "Friends", Users: friends}
 			message, _ := json.Marshal(messageData)
 			err = conn.WriteMessage(websocket.TextMessage, message)
-			fmt.Println(friends)
+			// fmt.Println(friends)
 			if err != nil {
 				fmt.Println("Error sending friends list:", err)
 				return
@@ -208,7 +225,7 @@ func sendPostsToClients(conn *websocket.Conn) {
 		fmt.Println("Erreur pour chopper les données de GetPosts()!")
 		return
 	}
-	fmt.Println(posts)
+	// fmt.Println(posts)
 	postData, _ := json.Marshal(posts)
 	err = conn.WriteMessage(websocket.TextMessage, postData)
 	if err != nil {

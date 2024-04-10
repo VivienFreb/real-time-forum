@@ -159,7 +159,7 @@
             userStatus.forEach(user =>{
                 const li = document.createElement('li');
                 li.textContent = `${user.Name}`;
-                li.style.color = user.status === 'active' ? 'green' : 'red';
+                li.style.color = user.Status === 'active' ? 'green' : 'red';
                 userList.appendChild(li);
             })
         }

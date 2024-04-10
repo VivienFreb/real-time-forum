@@ -259,3 +259,20 @@ func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
 
 	return statusList, nil
 }
+
+func Activation(db *sql.DB, currentUser string) error {
+    _, err := db.Exec("UPDATE Users SET status = 'active' WHERE username = ?", currentUser)
+    if err != nil {
+        return fmt.Errorf("failed to activate user: %v", err)
+    }
+    fmt.Println(currentUser, "is now active") // Log successful activation
+    return nil
+}
+
+func Deactivation(db *sql.DB) error {
+	_, err := db.Exec("UPDATE Users SET status = 'inactive'")
+	if err != nil {
+		return fmt.Errorf("failed to deactivate users: %v", err)
+	}
+	return nil
+}
