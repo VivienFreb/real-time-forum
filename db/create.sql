@@ -16,6 +16,13 @@ CREATE TABLE IF NOT EXISTS `Posts` (
 
     FOREIGN KEY (user_id ) references Users(id)
 );
+
+CREATE TABLE IF NOT EXISTS `Disscussions`(
+    speaker TEXT NOT NULL,
+    listener TEXT NOT NULL,
+    content TEXT NOT NULL
+)
+
 -- CREATE TABLE IF NOT EXISTS `Comments` (
 --     id INTEGER PRIMARY KEY AUTOINCREMENT,
 --     message TEXT,

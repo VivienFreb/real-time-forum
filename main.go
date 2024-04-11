@@ -26,6 +26,7 @@ var db *sql.DB
 type Denomination struct {
 	FormName string `json:"formName"`
 	Username string `json:"Username"`
+	Other    string `json:"Other"`
 }
 type FormDataRegister struct {
 	FormName        string `json:"formName"`
@@ -101,20 +102,20 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 		}
 	} else {
 		fmt.Println("Impossible de se connecter avec ce pseudo.")
-		response := trek.LoginResponse{Success: false, Message:"Nom ou MDP invalide.",Name: "Login"}
+		response := trek.LoginResponse{Success: false, Message: "Nom ou MDP invalide.", Name: "Login"}
 		responseData, err := json.Marshal(response)
-		if err != nil{
+		if err != nil {
 			fmt.Println("Erreur pour recompiler le message d'échec en JSON.")
 			return
 		}
 		err = conn.WriteMessage(websocket.TextMessage, responseData)
-		if err != nil{
+		if err != nil {
 			fmt.Println("Erreur lors du renvoi du JSON d'erreur dans le script.")
 		}
 	}
 }
 
-var activeConn int 
+var activeConn int
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade de la connexion HTTP vers une connexion WebSocket
@@ -126,18 +127,18 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-        // Decrement the activeConnections counter when the connection is closed
-        activeConn--
-        // Check if there are no more active connections
-        if activeConn == 0 {
-            // Perform deactivation logic when there are no active connections
-            err := utils.Deactivation(db)
-            if err != nil {
-                fmt.Println("Error deactivating all users:", err)
-            }
-        }
-        conn.Close()
-    }()
+		// Decrement the activeConnections counter when the connection is closed
+		activeConn--
+		// Check if there are no more active connections
+		if activeConn == 0 {
+			// Perform deactivation logic when there are no active connections
+			err := utils.Deactivation(db)
+			if err != nil {
+				fmt.Println("Error deactivating all users:", err)
+			}
+		}
+		conn.Close()
+	}()
 	// fmt.Println("je rentre2")
 	// Boucle pour lire les messages WebSocket
 	for {
@@ -188,12 +189,30 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			message, _ := json.Marshal(messageData)
 			err = conn.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
-				fmt.Println("Error sending friends list:", err)
+				fmt.Println("Error pour envoyer la liste d'amis:", err)
 				return
 			}
+		case "discussions":
+			fmt.Println(nomForm.Other)
+			discussionHandler(conn, nomForm)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
+	}
+}
+
+func discussionHandler(conn *websocket.Conn, data Denomination){
+	convs, err := utils.GetDiscussion(db, data.Username, data.Other)
+	if err != nil{
+		fmt.Println("Erreur pour chopper les convs:", err)
+		return
+	}
+	messageData := trek.MessageOuter{Name: "chatHistory", Chats: convs}
+	message, _ := json.Marshal(messageData)
+	err = conn.WriteMessage(websocket.TextMessage, message)
+	if err != nil {
+		fmt.Println("Erreur pour envoyer l'historique des chats:", err)
+		return
 	}
 }
 

@@ -45,6 +45,17 @@ type Update struct {
 }
 
 type NewStatus struct {
-	Name string `json:"Name"`
+	Name   string   `json:"Name"`
 	Checks []Update `json:"Checks"`
+}
+
+type MessageInner struct {
+	Speaker  string `json:"Speaker"`
+	Listener string `json:"Listener"`
+	Content  string `json:"Content"`
+}
+
+type MessageOuter struct {
+	Name  string      `json:"Name"`
+	Chats []MessageInner `json:"Chats"`
 }

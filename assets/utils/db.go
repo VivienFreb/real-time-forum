@@ -276,3 +276,24 @@ func Deactivation(db *sql.DB) error {
 	}
 	return nil
 }
+
+func GetDiscussion(db *sql.DB, currentUser string, otherUser string)([]s.MessageInner, error) {
+	rows, err := db.Query("SELECT Speaker, Listener, Content FROM Disscussions WHERE (Speaker = ? AND Listener = ?) OR (Speaker = ? AND Listener = ?)",currentUser,otherUser,otherUser,currentUser)
+	if err != nil {
+		return nil, fmt.Errorf("impossible de récupérer les discussions: %v", err)
+	}
+	defer rows.Close()
+
+	var discussionList []s.MessageInner
+	for rows.Next(){
+		var message s.MessageInner
+		if err := rows.Scan(&message.Speaker, &message.Listener, &message.Content);err != nil{
+			return nil, fmt.Errorf("impossible de scan une discussion: %v", err)
+		}
+		discussionList = append(discussionList, message)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("erreur pendant l'itération des convs: %v", err)
+	}
+	return discussionList, nil
+}

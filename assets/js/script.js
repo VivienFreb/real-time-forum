@@ -15,6 +15,7 @@
         let login_password = document.getElementById('login_password')
 
         let currentUser;
+        let currentOther;
 
 
 
@@ -101,11 +102,14 @@
             // Envoyer les données via WebSocket
             socket.send(JSON.stringify(data));
             currentUser = login_username.value;
+
+            const sidebar = document.querySelector('.sidenav')
+            sidebar.classList.remove('hidden')
+
             login_username.value = '';
             login_password.value = '';
             getUsers()
             requestsPosts()
-            // getStatus()
         });
 
         socket.addEventListener('message', function(event){
@@ -128,14 +132,24 @@
                     friendList.forEach(user =>{
                         const li = document.createElement('li')
                         li.textContent = user.username
-                        li.style.color = "white"
+                        li.style.color = "red"
                         document.getElementById('userList').appendChild(li)
+
+                        li.addEventListener('click', function(){
+                            console.log("You clicked!");
+                            currentOther = li.textContent
+                            getChat()
+                            document.querySelector('.dashboard').classList.add('hidden')
+                        })
                     })
                 }
                 if (response.Name === "userStatus"){
                     // console.log(response);
                     updateUserStatus(response.Checks)
                 } 
+                if (response.Name === "chatHistory"){
+                    generateChat(response.Chats)
+                }
             } 
         })
 
@@ -151,9 +165,15 @@
             dashboardContent.appendChild(postsList)
         }
 
+        function generateChat(discs){
+            
+        }
+
         function updateUserStatus(userStatus){
             const userList = document.getElementById('userList')
             userList.innerHTML = ''
+            const newline = document.createElement('br')
+            userList.appendChild(newline)
             console.log(userStatus);
 
             userStatus.forEach(user =>{
@@ -168,5 +188,6 @@
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
         const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
+        const getChat = () => {message = {FormName:"discussions", "Username":`${currentUser}`,"Other":`${currentOther}`};socket.send(JSON.stringify(message))}
         setInterval(getStatus, 10000)
         // getStatus()
