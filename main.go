@@ -27,6 +27,7 @@ type Denomination struct {
 	FormName string `json:"formName"`
 	Username string `json:"Username"`
 	Other    string `json:"Other"`
+	Content  string `json:"Content"`
 }
 type FormDataRegister struct {
 	FormName        string `json:"formName"`
@@ -195,15 +196,19 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		case "discussions":
 			fmt.Println(nomForm.Other)
 			discussionHandler(conn, nomForm)
+		case"chatEnvoy":
+			fmt.Println("Etape 2")
+			fmt.Println(nomForm)
+			utils.NewMessage(db, nomForm.Username, nomForm.Other, nomForm.Content)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
 	}
 }
 
-func discussionHandler(conn *websocket.Conn, data Denomination){
+func discussionHandler(conn *websocket.Conn, data Denomination) {
 	convs, err := utils.GetDiscussion(db, data.Username, data.Other)
-	if err != nil{
+	if err != nil {
 		fmt.Println("Erreur pour chopper les convs:", err)
 		return
 	}

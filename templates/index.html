@@ -60,15 +60,18 @@
     <div id="content_dashboard" class="dashboard hidden">
         <h2>Tableau de bord</h2>
         <p>Bienvenue sur votre tableau de bord.</p>
-        <!-- <button id="logout">Déconnexion</button> -->
+        <button id="logout">Déconnexion</button>
     </div>
     <div class="sidenav hidden" id="sidebar">
         <div id="MyName"></div>
         <h2 style="color: grey;">Friends</h2>
         <ul id="userList"><br></ul>
     </div>
-<div id="chat-conversation">
-    
-</div>
+    <div class="container hidden" id="chatContainer">
+        <div id="messageInput">
+            <input type="text" id="messageText" placeholder="Type your message here...">
+            <button id="sendMessageBtn">Send</button>
+        </div> 
+    </div>
 </body>
 </html>

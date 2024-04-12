@@ -88,30 +88,15 @@ body{
   display: table;
 }
 
-/* Style images */
-.container img {
-  float: left;
-  max-width: 60px;
-  width: 100%;
-  margin-right: 20px;
-  border-radius: 50%;
+/* Adjust the position of the chat container */
+#chatContainer {
+  height: 100%;
+  width: calc(100% - 160px); /* Subtract sidebar width */
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0; /* Adjust to the right side of the sidebar */
+  background-color: #111;
+  overflow-y: scroll; /* Enable vertical scrolling */
+  padding-top: 20px;
 }
-
-/* Style the right image */
-.container img.right {
-  float: right;
-  margin-left: 20px;
-  margin-right:0;
-}
-
-/* Style time text */
-.time-right {
-  float: right;
-  color: #aaa;
-}
-
-/* Style time text */
-.time-left {
-  float: left;
-  color: #999;
-} 

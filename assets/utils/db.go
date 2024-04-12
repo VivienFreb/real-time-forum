@@ -297,3 +297,10 @@ func GetDiscussion(db *sql.DB, currentUser string, otherUser string)([]s.Message
 	}
 	return discussionList, nil
 }
+
+func NewMessage (db *sql.DB, me string, them string, message string){
+	_, err := db.Exec("INSERT INTO Disscussions (Speaker, Listener, Content) VALUES (?, ?, ?)", me, them, message)
+	if err != nil {
+		fmt.Println("Impossible d'enregistrer le message.")
+	}
+}

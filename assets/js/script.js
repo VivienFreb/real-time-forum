@@ -13,6 +13,9 @@
         let register_confirm_password = document.getElementById('register_confirm_password')
         let login_username = document.getElementById('login_username');
         let login_password = document.getElementById('login_password')
+        let sendMessageBtn = document.getElementById('sendMessageBtn')
+        const messageText = document.getElementById('messageText')
+
 
         let currentUser;
         let currentOther;
@@ -140,6 +143,7 @@
                             currentOther = li.textContent
                             getChat()
                             document.querySelector('.dashboard').classList.add('hidden')
+                            document.querySelector('.container').classList.remove('hidden')
                         })
                     })
                 }
@@ -166,7 +170,21 @@
         }
 
         function generateChat(discs){
-            
+            console.log(discs)
+            const chatContainer = document.getElementById('chatContainer')
+            // chatContainer.innerHTML = ''
+            // createSendDiv()
+
+            discs.forEach(message =>{
+                const chatBubble = document.createElement('div')
+                chatBubble.classList.add('container')
+                if (message.Speaker === currentUser){
+                    chatBubble.classList.add('darker')
+                }
+                chatBubble.innerHTML = `<p><strong>${message.Speaker}:</strong> ${message.Content}</p>`;
+                chatContainer.appendChild(chatBubble)
+            })
+            chatContainer.scrollTop = chatContainer.scrollHeight
         }
 
         function updateUserStatus(userStatus){
@@ -181,8 +199,41 @@
                 li.textContent = `${user.Name}`;
                 li.style.color = user.Status === 'active' ? 'green' : 'red';
                 userList.appendChild(li);
+
+                li.addEventListener('click', function(){
+                    console.log("You clicked!");
+                    currentOther = li.textContent
+                    getChat()
+                    document.querySelector('.dashboard').classList.add('hidden')
+                    document.querySelector('.container').classList.remove('hidden')
+                })
             })
         }
+
+        function clearChatHistory(){
+            const chatContainer = document.getElementById('chatContainer')
+            const containers = chatContainer.getElementsByClassName('container')
+            while (containers.length > 0) {
+                containers[0].parentNode.removeChild(containers[0]);
+            }
+        }
+
+        sendMessageBtn.addEventListener('click', function(){
+            console.log('Etape 1')
+            const messageContent = messageText.value.trim();
+            if (messageContent !== ''){
+                const message = {
+                    FormName:"chatEnvoy",
+                    "Username": `${currentUser}`,
+                    "Other": `${currentOther}`,
+                    Content: messageContent
+                }
+                socket.send(JSON.stringify(message))
+            }
+            messageText.value = ''
+            clearChatHistory()
+            getChat()
+        })
 
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
