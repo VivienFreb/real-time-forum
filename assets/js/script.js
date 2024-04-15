@@ -15,6 +15,8 @@
         const messageText = document.getElementById('messageText')
         const sidebar = document.querySelector('.sidenav')
         let logoutBtn = document.getElementById('logout')
+        let homeBtn = document.getElementById('homeBtn')
+        let chatContainer = document.getElementById('chatContainer')
         let currentUser;
         let currentOther;
 
@@ -29,6 +31,13 @@
             Empty('userList')
             document.getElementById('userList').appendChild(document.createElement('br'))
             unlog()
+        })
+
+        homeBtn.addEventListener('click', function(){
+            if (dashboard_page.classList.contains('hidden')){
+                document.querySelector('.dashboard').classList.remove('hidden')
+                document.querySelector('.container').classList.add('hidden')
+            }
         })
 
 
@@ -92,6 +101,8 @@
             formData.forEach((value, key) => {
                 data[key] = value;
             });
+            data.username = register_username.value
+            currentUser = register_username.value;
 
             // Envoyer les données via WebSocket
             socket.send(JSON.stringify(data));
@@ -99,8 +110,11 @@
             document.getElementById('register_email').value = null;
             document.getElementById('register_password').value = null;
             document.getElementById('register_confirm_password').value = null;
+            requestsPosts()
+            getUsers()
             document.getElementById('User-Verif').classList.add('hidden')
             document.getElementById('content_dashboard').classList.remove('hidden')
+            sidebar.classList.remove('hidden')
             // displayPosts()
             // socket.close()
             // initWebSocket()
@@ -157,11 +171,13 @@
                         document.getElementById('userList').appendChild(li)
 
                         li.addEventListener('click', function(){
-                            console.log("You clicked!");
+                            console.log(li.textContent);
+                            if (currentOther !== li.textContent){console.log("You clicked!");
+                            if (chatContainer.classList.contains('hidden')) chatContainer.classList.remove('hidden')
                             currentOther = li.textContent
                             getChat()
                             document.querySelector('.dashboard').classList.add('hidden')
-                            document.querySelector('.container').classList.remove('hidden')
+                            document.querySelector('.container').classList.remove('hidden')}
                         })
                     })
                 }
@@ -191,7 +207,8 @@
             clearChatHistory()
             const chatContainer = document.getElementById('chatContainer')
 
-            discs.forEach(message =>{
+            if (discs.length > 0) {
+                discs.forEach(message =>{
                 const chatBubble = document.createElement('div')
                 chatBubble.classList.add('container')
                 if (message.Speaker === currentUser){
@@ -199,7 +216,8 @@
                 }
                 chatBubble.innerHTML = `<p><strong>${message.Speaker}:</strong> ${message.Content}</p>`;
                 chatContainer.appendChild(chatBubble)
-            })
+                })
+            }
             chatContainer.scrollTop = chatContainer.scrollHeight
         }
 
@@ -217,11 +235,13 @@
                 userList.appendChild(li);
 
                 li.addEventListener('click', function(){
-                    console.log("You clicked!");
+                    if (currentOther !== li.textContent){console.log("You clicked!",this.textContent);
                     currentOther = li.textContent
                     getChat()
                     document.querySelector('.dashboard').classList.add('hidden')
-                    document.querySelector('.container').classList.remove('hidden')
+                    document.querySelector('.container').classList.remove('hidden')}
+                    if (chatContainer.classList.contains('hidden')) chatContainer.classList.remove('hidden');
+                    
                 })
             })
         }

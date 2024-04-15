@@ -160,7 +160,7 @@ func InsertUser(db *sql.DB, username string, email string, password string, conf
 	if password != confirm {
 		fmt.Println("Mots de passe différents.")
 	}
-	_, err := db.Exec("INSERT INTO Users (username, email, password) VALUES (?, ?, ?)", username, email, password)
+	_, err := db.Exec("INSERT INTO Users (username, email, password, status) VALUES (?, ?, ?,?)", username, email, password,"inactive")
 	if err != nil {
 		fmt.Println("Impossible d'enregistrer l'utilisateur")
 	}
