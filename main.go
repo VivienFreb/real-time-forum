@@ -155,8 +155,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// Traitez les données en fonction du nom du formulaire
-
-		fmt.Println("form", nomForm.FormName, nomForm.Username)
+		fmt.Println(activeConn)
+		// fmt.Println("form", nomForm.FormName, nomForm.Username)
 		switch nomForm.FormName {
 		case "register":
 			registerHandler(conn, message)
