@@ -256,17 +256,33 @@ func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error during iteration: %v", err)
 	}
-
+	ForcedActive(db, currentUser)
 	return statusList, nil
 }
 
-func Activation(db *sql.DB, currentUser string) error {
-    _, err := db.Exec("UPDATE Users SET status = 'active' WHERE username = ?", currentUser)
+func ForcedActive(db *sql.DB, username string) {
+    var status string
+    err := db.QueryRow("SELECT status FROM Users WHERE username = ?", username).Scan(&status)
     if err != nil {
-        return fmt.Errorf("failed to activate user: %v", err)
+        fmt.Println("Error querying user status:", err)
+        return
     }
-    fmt.Println(currentUser, "is now active") // Log successful activation
-    return nil
+    if status != "active" {
+        _, updateErr := db.Exec("UPDATE Users SET status = 'active' WHERE username = ?", username)
+        if updateErr != nil {
+            fmt.Println("Error updating user status:", updateErr)
+            return
+        }
+    }
+}
+
+func Activation(db *sql.DB, currentUser string) error {
+	_, err := db.Exec("UPDATE Users SET status = 'active' WHERE username = ?", currentUser)
+	if err != nil {
+		return fmt.Errorf("failed to activate user: %v", err)
+	}
+	fmt.Println(currentUser, "is now active") // Log successful activation
+	return nil
 }
 
 func Deactivation(db *sql.DB) error {
@@ -277,17 +293,17 @@ func Deactivation(db *sql.DB) error {
 	return nil
 }
 
-func GetDiscussion(db *sql.DB, currentUser string, otherUser string)([]s.MessageInner, error) {
-	rows, err := db.Query("SELECT Speaker, Listener, Content FROM Disscussions WHERE (Speaker = ? AND Listener = ?) OR (Speaker = ? AND Listener = ?)",currentUser,otherUser,otherUser,currentUser)
+func GetDiscussion(db *sql.DB, currentUser string, otherUser string) ([]s.MessageInner, error) {
+	rows, err := db.Query("SELECT Speaker, Listener, Content FROM Disscussions WHERE (Speaker = ? AND Listener = ?) OR (Speaker = ? AND Listener = ?)", currentUser, otherUser, otherUser, currentUser)
 	if err != nil {
 		return nil, fmt.Errorf("impossible de récupérer les discussions: %v", err)
 	}
 	defer rows.Close()
 
 	var discussionList []s.MessageInner
-	for rows.Next(){
+	for rows.Next() {
 		var message s.MessageInner
-		if err := rows.Scan(&message.Speaker, &message.Listener, &message.Content);err != nil{
+		if err := rows.Scan(&message.Speaker, &message.Listener, &message.Content); err != nil {
 			return nil, fmt.Errorf("impossible de scan une discussion: %v", err)
 		}
 		discussionList = append(discussionList, message)
@@ -298,9 +314,16 @@ func GetDiscussion(db *sql.DB, currentUser string, otherUser string)([]s.Message
 	return discussionList, nil
 }
 
-func NewMessage (db *sql.DB, me string, them string, message string){
+func NewMessage(db *sql.DB, me string, them string, message string) {
 	_, err := db.Exec("INSERT INTO Disscussions (Speaker, Listener, Content) VALUES (?, ?, ?)", me, them, message)
 	if err != nil {
 		fmt.Println("Impossible d'enregistrer le message.")
+	}
+}
+
+func Delog(db *sql.DB, username string) {
+	_, err := db.Exec("UPDATE Users SET status = 'inactive' WHERE username = ?", username)
+	if err != nil {
+		fmt.Printf("Impossible de delog %s.\n", username)
 	}
 }

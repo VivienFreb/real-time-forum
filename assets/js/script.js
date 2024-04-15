@@ -1,12 +1,10 @@
         let inscription_page = document.getElementById("content_inscription");
         let login_page = document.getElementById("content_login");
         let dashboard_page = document.getElementById("content_dashboard");
-
         let registerBtn = document.getElementById('registrationBtn');
         let registerForm = document.getElementById('registrationForm');
         let loginBtn = document.getElementById('loginBtn');
         let loginForm = document.getElementById('loginForm');
-
         let register_username = document.getElementById('register_username')
         let register_email = document.getElementById('register_email')
         let register_password = document.getElementById('register_password')
@@ -15,10 +13,30 @@
         let login_password = document.getElementById('login_password')
         let sendMessageBtn = document.getElementById('sendMessageBtn')
         const messageText = document.getElementById('messageText')
-
-
+        const sidebar = document.querySelector('.sidenav')
+        let logoutBtn = document.getElementById('logout')
         let currentUser;
         let currentOther;
+
+
+
+        logoutBtn.addEventListener('click', function(){
+            dashboard_page.classList.add('hidden')
+            sidebar.classList.add('hidden')
+            document.getElementById('User-Verif').classList.remove('hidden')
+            document.getElementById('chatContainer').classList.add('hidden')
+            document.getElementById('MyName').innerHTML = ''
+            Empty('userList')
+            document.getElementById('userList').appendChild(document.createElement('br'))
+            unlog()
+        })
+
+
+        function Empty(arg){
+            const Arg = document.getElementById(arg)
+            while (Arg.firstChild) Arg.removeChild(Arg.firstChild)
+        }
+
 
 
 
@@ -111,8 +129,8 @@
 
             login_username.value = '';
             login_password.value = '';
-            getUsers()
             requestsPosts()
+            getUsers()
         });
 
         socket.addEventListener('message', function(event){
@@ -148,8 +166,7 @@
                     })
                 }
                 if (response.Name === "userStatus"){
-                    // console.log(response);
-                    updateUserStatus(response.Checks)
+                  updateUserStatus(response.Checks)
                 } 
                 if (response.Name === "chatHistory"){
                     generateChat(response.Chats)
@@ -171,9 +188,8 @@
 
         function generateChat(discs){
             console.log(discs)
+            clearChatHistory()
             const chatContainer = document.getElementById('chatContainer')
-            // chatContainer.innerHTML = ''
-            // createSendDiv()
 
             discs.forEach(message =>{
                 const chatBubble = document.createElement('div')
@@ -240,5 +256,12 @@
         const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getChat = () => {message = {FormName:"discussions", "Username":`${currentUser}`,"Other":`${currentOther}`};socket.send(JSON.stringify(message))}
-        setInterval(getStatus, 10000)
+        const unlog = () => {message = {FormName:"delog", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
+        setInterval(CheckIfNeeded,1000)
+
+        function CheckIfNeeded(){
+            if (!sidebar.classList.contains('hidden')) getStatus()
+        }
         // getStatus()
+
+        // Gërrémîe PaiLæj
