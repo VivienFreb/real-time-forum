@@ -252,7 +252,8 @@ func sendPostsToClients(conn *websocket.Conn) {
 		return
 	}
 	// fmt.Println(posts)
-	postData, _ := json.Marshal(posts)
+	message := trek.PostArray{Name: "Posts", Posts: posts}
+	postData, _ := json.Marshal(message)
 	err = conn.WriteMessage(websocket.TextMessage, postData)
 	if err != nil {
 		fmt.Println("Erreur pour renvoyer les données vers le JS!")

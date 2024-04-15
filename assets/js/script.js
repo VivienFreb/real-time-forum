@@ -187,6 +187,9 @@
                 if (response.Name === "chatHistory"){
                     generateChat(response.Chats)
                 }
+                if (response.Name === "Posts"){
+                    displayPosts(response.Posts)
+                }
             } 
         })
 
@@ -206,8 +209,7 @@
             console.log(discs)
             clearChatHistory()
             const chatContainer = document.getElementById('chatContainer')
-
-            if (discs.length > 0) {
+            if (discs != null) {
                 discs.forEach(message =>{
                 const chatBubble = document.createElement('div')
                 chatBubble.classList.add('container')
@@ -277,7 +279,7 @@
         const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getChat = () => {message = {FormName:"discussions", "Username":`${currentUser}`,"Other":`${currentOther}`};socket.send(JSON.stringify(message))}
         const unlog = () => {message = {FormName:"delog", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
-        setInterval(CheckIfNeeded,1000)
+        setInterval(CheckIfNeeded,5000)
 
         function CheckIfNeeded(){
             if (!sidebar.classList.contains('hidden')) getStatus()

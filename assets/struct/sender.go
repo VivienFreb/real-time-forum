@@ -56,6 +56,11 @@ type MessageInner struct {
 }
 
 type MessageOuter struct {
-	Name  string      `json:"Name"`
+	Name  string         `json:"Name"`
 	Chats []MessageInner `json:"Chats"`
+}
+
+type PostArray struct {
+	Name  string `json:"Name"`
+	Posts []Post `json:"Posts"`
 }
