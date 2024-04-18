@@ -100,3 +100,38 @@ body{
   overflow-y: scroll; /* Enable vertical scrolling */
   padding-top: 20px;
 }
+
+/* -------------------------------- */
+
+
+.extPanel {
+  position: fixed;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.extPanel input,
+.extPanel textarea {
+  width: calc(100% - 22px);
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.extPanel button {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.extPanel button:hover {
+  background-color: #0056b3;
+}

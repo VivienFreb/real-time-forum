@@ -20,8 +20,6 @@
         let currentUser;
         let currentOther;
 
-
-
         logoutBtn.addEventListener('click', function(){
             dashboard_page.classList.add('hidden')
             sidebar.classList.add('hidden')
@@ -40,16 +38,11 @@
             }
         })
 
-
         function Empty(arg){
             const Arg = document.getElementById(arg)
             while (Arg.firstChild) Arg.removeChild(Arg.firstChild)
         }
 
-
-
-
-    
         document.getElementById('showLoginPage').addEventListener('click', function() {
             inscription_page.classList.add("hidden");
             login_page.classList.remove("hidden");
@@ -60,11 +53,6 @@
             login_page.classList.add("hidden");
             dashboard_page.classList.add("hidden");
         });
-        // document.getElementById('logout').addEventListener('click', function() {
-        //     inscription_page.classList.add("hidden");
-        //     login_page.classList.remove("hidden");
-        //     dashboard_page.classList.add("hidden");
-        // });
 
         function initWebSocket() 
         {
@@ -78,7 +66,6 @@
             return socket;
         }
 
-    
         const socket = initWebSocket();
 
         socket.addEventListener('open', function (event) {
@@ -151,14 +138,14 @@
             const response = JSON.parse(event.data)
             console.log(response);
             if (response && response.Name){
-                if (response.Name == "Login")
-                     if (response.Success){
-                        document.getElementById('User-Verif').classList.add('hidden')
-                        document.getElementById('content_dashboard').classList.remove('hidden')
-                        console.log("Coucou, je rentre dans LOGIN ");
+                if (response.Name == "Login") {
+                    if (response.Success){
+                    document.getElementById('User-Verif').classList.add('hidden')
+                    document.getElementById('content_dashboard').classList.remove('hidden')
+                    console.log("Coucou, je rentre dans LOGIN ");
                      }
+                }                
                 if (response.Name === "Friends"){
-                    console.log("This is the friends list:\n",response.Ray);
                     const friendList = response.Users;
                     const me = document.createElement('h4')
                     me.textContent = currentUser
@@ -188,21 +175,65 @@
                     generateChat(response.Chats)
                 }
                 if (response.Name === "Posts"){
+                    console.log(response.Posts);
                     displayPosts(response.Posts)
                 }
+                if (response.Success){
+                    document.getElementById('User-Verif').classList.add('hidden')
+                    document.getElementById('content_dashboard').classList.remove('hidden')
+                    console.log("Coucou, je rentre dans LOGIN ");
+                 }
             } 
         })
 
         function displayPosts(posts) {
             const dashboardContent = document.getElementById('content_dashboard')
+            const htmlCode = `
+        <div id="quickReply" class="extPanel reply" style="right: 0px; top: 10%;">
+            <div id="qrForm">
+                <div><input name="name" type="text" placeholder="Subject"></div>
+                <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
+                <button id="postBtn">Post</button>
+            </div>
+        </div>
+    `;
+            
+
+
             const postsList = document.createElement('ul')
-            posts.forEach(post =>{
-                const listItem = document.createElement('li')
-                listItem.textContent = `${post.Title} - ${post.User_id} - ${post.Description}`;
-                postsList.appendChild(listItem)
-            })
+            posts.forEach(post => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${post.Title} - ${post.User_name} - ${post.Description}`;
+            
+                if (post.Comments && post.Comments.length > 0) {
+                    const commentsList = document.createElement('ul');
+                    post.Comments.forEach(comment => {
+                        console.log("Commentaire:",comment);
+                        const commentItem = document.createElement('li');
+                        commentItem.textContent = `${comment.Username} said: ${comment.Content}`;
+                        commentsList.appendChild(commentItem);
+                    });
+                    listItem.appendChild(commentsList);
+                }
+            
+                postsList.appendChild(listItem);
+            });
             dashboardContent.innerHTML = '';
+            dashboardContent.innerHTML += htmlCode
             dashboardContent.appendChild(postsList)
+            const postBtn = document.getElementById('postBtn')
+            postBtn.addEventListener('click',function(){
+
+                const formData = {
+                    formName: 'postCreation',
+                    "Username": currentUser,
+                    "Subject": document.querySelector('#quickReply input[name="name"]').value,
+                    "Content": document.querySelector('#quickReply textarea[name="com"]').value
+                }
+                socket.send(JSON.stringify(formData))
+                document.querySelector('#quickReply input[name="name"]').value = ''
+                document.querySelector('#quickReply textarea[name="com"]').value = ''
+            })
         }
 
         function generateChat(discs){
@@ -287,3 +318,8 @@
         // getStatus()
 
         // Gërrémîe PaiLæj
+
+// Post [Title, Username, Content, []Comment]
+// Comment [CommentFrom, Username, Content]
+// 
+//         

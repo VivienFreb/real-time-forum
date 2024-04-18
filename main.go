@@ -43,6 +43,13 @@ type FormDataLogin struct {
 	Password string `json:"password"`
 }
 
+type FormDataPost struct {
+	FormName string `json:"formName"`
+	Username string `json:"Username"`
+	Subject  string `json:"Subject"`
+	Content  string `json:"Content"`
+}
+
 func initDB() {
 	var err error
 	db, err = sql.Open("sqlite3", "./db/forum.sqlite")
@@ -149,6 +156,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var nomForm Denomination
+		var postForm FormDataPost
 		err = json.Unmarshal(message, &nomForm)
 		if err != nil {
 			fmt.Println("Erreur lors de l'analyse des données JSON:", err)
@@ -159,7 +167,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		// fmt.Println("form", nomForm.FormName, nomForm.Username)
 		switch nomForm.FormName {
 		case "register":
-			registerHandler(conn, message)
+			registerHandler(message)
 		case "login":
 			loginHandler(conn, message)
 		case "posts":
@@ -172,7 +180,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("Error getting friends:", err)
 				return
 			}
-			messageData := trek.AllMyFellas{Name: "Friends", Users: friends}
+			messageData := trek.UsersArray{Name: "Friends", Users: friends}
 			message, _ := json.Marshal(messageData)
 			err = conn.WriteMessage(websocket.TextMessage, message)
 			// fmt.Println(friends)
@@ -202,6 +210,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			utils.NewMessage(db, nomForm.Username, nomForm.Other, nomForm.Content)
 		case "delog":
 			utils.Delog(db, nomForm.Username)
+		case "postCreation":
+			json.Unmarshal(message, &postForm)
+			utils.CreatePost(db, postForm.Username, postForm.Subject, postForm.Content)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}
@@ -223,7 +234,7 @@ func discussionHandler(conn *websocket.Conn, data Denomination) {
 	}
 }
 
-func registerHandler(conn *websocket.Conn, message []byte) {
+func registerHandler(message []byte) {
 	var formData FormDataRegister
 	err := json.Unmarshal(message, &formData)
 	if err != nil {

@@ -34,7 +34,7 @@ type ArrayConcept struct {
 	Ray  []string `json:"Ray"`
 }
 
-type AllMyFellas struct {
+type UsersArray struct {
 	Name  string `json:"Name"`
 	Users []User `json:"Users"`
 }
@@ -63,4 +63,27 @@ type MessageOuter struct {
 type PostArray struct {
 	Name  string `json:"Name"`
 	Posts []Post `json:"Posts"`
+}
+
+type Comment struct {
+	ID       *int
+	Username string
+	Content  string
+}
+
+type Post struct {
+	ID          int
+	Title       string
+	Description string
+	User_name   string
+	Pseudo      string
+	Comments    []Comment
+}
+
+type MyPost struct {
+	ID          int
+	Title       string
+	Description string
+	Date        string
+	Comments    int
 }
