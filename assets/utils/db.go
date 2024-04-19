@@ -160,7 +160,7 @@ func Activation(db *sql.DB, currentUser string) error {
 	if err != nil {
 		return fmt.Errorf("failed to activate user: %v", err)
 	}
-	fmt.Println(currentUser, "is now active") // Log successful activation
+	fmt.Println(currentUser, "est connecté.") 
 	return nil
 }
 
@@ -205,6 +205,7 @@ func Delog(db *sql.DB, username string) {
 	if err != nil {
 		fmt.Printf("Impossible de delog %s.\n", username)
 	}
+	fmt.Println(username, "est déconnecté.") 
 }
 
 func CreatePost(db *sql.DB, username string, subject string, content string) {

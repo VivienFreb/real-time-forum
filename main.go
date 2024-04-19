@@ -82,10 +82,7 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 		return
 	}
 
-	// Gérez les données du formulaire de connexion
-	fmt.Println("Données du formulaire de connexion:")
-	fmt.Println("Nom d'utilisateur:", formData.Username)
-	fmt.Println("Mot de passe:", formData.Password)
+	fmt.Println("Connexion de", formData.Username)
 
 	user, err := utils.GetUserByUsername(db, formData.Username)
 	if err != nil {
@@ -93,12 +90,10 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 	}
 
 	if user != nil && user.Password == formData.Password {
-		fmt.Printf("%s was successfully logged.\n", user.Username)
 		utils.Activation(db, formData.Username)
 
 		response := trek.LoginResponse{Success: true, Message: "Everything is fine.", Name: "Login"}
 		responseData, err := json.Marshal(response)
-		fmt.Println(string(responseData))
 		if err != nil {
 			fmt.Println("Problème pour tout remettre en JSON.")
 			return

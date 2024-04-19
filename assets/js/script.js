@@ -59,7 +59,6 @@
             const socket = new WebSocket('ws://localhost:8080/ws');
         
             socket.addEventListener('open', function (event) {
-                console.log('WebSocket connection established');
                 rebootStatus()
             });
         
@@ -67,10 +66,6 @@
         }
 
         const socket = initWebSocket();
-
-        socket.addEventListener('open', function (event) {
-            console.log('Connexion WebSocket établie');
-        });
         
         registerBtn.addEventListener('click', function (event) {
             event.preventDefault(); // => Empêche la soumission du formulaire.
@@ -80,7 +75,6 @@
                 alert("L'un des champs requis est vide.")
                 return
             }
-            console.log(registerForm);
             const formData = new FormData(registerForm);
 
             // Convertir FormData en objet JSON
@@ -131,15 +125,15 @@
             getUsers()
         });
 
+        //La fonction qui gère les données de Golang-Websocket.
         socket.addEventListener('message', function(event){
             const response = JSON.parse(event.data)
-            console.log(response);
+            //Le nom du message est utilisé pour aiguiller le traitement.
             if (response && response.Name){
                 if (response.Name == "Login") {
                     if (response.Success){
                     document.getElementById('User-Verif').classList.add('hidden')
                     document.getElementById('content_dashboard').classList.remove('hidden')
-                    console.log("Coucou, je rentre dans LOGIN ");
                      }
                 }                
                 if (response.Name === "Friends"){
@@ -155,7 +149,6 @@
                         document.getElementById('userList').appendChild(li)
 
                         li.addEventListener('click', function(){
-                            console.log(li.textContent);
                             if (currentOther !== li.textContent){console.log("You clicked!");
                             if (chatContainer.classList.contains('hidden')) chatContainer.classList.remove('hidden')
                             currentOther = li.textContent
@@ -172,13 +165,11 @@
                     generateChat(response.Chats)
                 }
                 if (response.Name === "Posts"){
-                    console.log(response.Posts);
                     displayPosts(response.Posts)
                 }
                 if (response.Success){
                     document.getElementById('User-Verif').classList.add('hidden')
                     document.getElementById('content_dashboard').classList.remove('hidden')
-                    console.log("Coucou, je rentre dans LOGIN ");
                  }
             } 
         })
@@ -194,7 +185,6 @@
                 if (post.Comments && post.Comments.length > 0) {
                     const commentsList = document.createElement('ul');
                     post.Comments.forEach(comment => {
-                        console.log("Commentaire:",comment);
                         const commentItem = document.createElement('li');
                         commentItem.textContent = `${comment.Username} said: ${comment.Content}`;
                         commentsList.appendChild(commentItem);
@@ -204,6 +194,24 @@
             
                 postsList.appendChild(listItem);
             });
+            const postCode = `
+            <div id="quickReply" class="extPanel  hidden" style="right: 0px; top: 10%;">
+                <div id="qrForm">
+                    <div><input name="name" type="text" placeholder="Subject"></div>
+                    <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
+                    <button id="postBtn">Post</button>
+                </div>
+            </div>
+        `;
+                
+            const commentCode = `
+                <div id="quickComment" class="extPanel reply hidden" style="right: 0px; top: 30%;">
+                    <div id="qrForm">
+                        <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
+                        <button id="commentBtn">Comment</button>
+                    </div>
+                </div>
+            `;
             dashboardContent.innerHTML = '';
             dashboardContent.innerHTML += postCode
             dashboardContent.innerHTML += commentCode
@@ -249,7 +257,6 @@
         }
 
         function generateChat(discs){
-            console.log(discs)
             clearChatHistory()
             const chatContainer = document.getElementById('chatContainer')
             if (discs != null) {
@@ -271,7 +278,6 @@
             userList.innerHTML = ''
             const newline = document.createElement('br')
             userList.appendChild(newline)
-            console.log(userStatus);
             requestsPosts()
 
             userStatus.forEach(user =>{
@@ -301,7 +307,6 @@
         }
 
         sendMessageBtn.addEventListener('click', function(){
-            console.log('Etape 1')
             const messageContent = messageText.value.trim();
             if (messageContent !== ''){
                 const message = {
@@ -323,27 +328,5 @@
         const getStatus = () => {message = {FormName:"userStatus", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
         const getChat = () => {message = {FormName:"discussions", "Username":`${currentUser}`,"Other":`${currentOther}`};socket.send(JSON.stringify(message))}
         const unlog = () => {message = {FormName:"delog", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
+        const CheckIfNeeded = () => (!sidebar.classList.contains('hidden')) ? getStatus() : null
         setInterval(CheckIfNeeded,5000)
-
-        function CheckIfNeeded(){
-            if (!sidebar.classList.contains('hidden')) getStatus()
-        }
-        
-        const postCode = `
-        <div id="quickReply" class="extPanel  hidden" style="right: 0px; top: 10%;">
-            <div id="qrForm">
-                <div><input name="name" type="text" placeholder="Subject"></div>
-                <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
-                <button id="postBtn">Post</button>
-            </div>
-        </div>
-    `;
-            
-        const commentCode = `
-            <div id="quickComment" class="extPanel reply hidden" style="right: 0px; top: 30%;">
-                <div id="qrForm">
-                    <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
-                    <button id="commentBtn">Comment</button>
-                </div>
-            </div>
-        `;
