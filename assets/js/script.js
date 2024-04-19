@@ -322,6 +322,7 @@
             getChat()
         })
 
+        //Assortiment de mini-fonctions qui activent des réponses précises du Golang-Websocket.
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
         const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}
