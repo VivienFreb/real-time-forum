@@ -245,8 +245,8 @@ func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	http.HandleFunc("/", defaultHandler)
 	http.HandleFunc("/ws", wsHandler)
-	fmt.Println("Serveur WebSocket démarré sur ws://localhost:8080/ws")
-	fmt.Println("Vrai serveur démarré sur http://localhost:8080")
+	fmt.Println("Serveur interne (WebSocket) démarré sur ws://localhost:8080/ws")
+	fmt.Println("Serveur externe (HTTP) démarré sur http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 	defer db.Close()
 }
