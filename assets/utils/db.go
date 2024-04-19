@@ -51,7 +51,6 @@ func GetPosts(db *sql.DB) ([]s.Post, error) {
 		if err != nil {
 			return nil, fmt.Errorf("echec lors du scan des colonnes: %v", err)
 		}
-		fmt.Println(post.ID,"POST ID HERE")
 		comments, err := GetComments(db, post.Title)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch comments: %v", err)

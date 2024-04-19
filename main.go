@@ -126,7 +126,7 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 var activeConn int
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	// Upgrade de la connexion HTTP vers une connexion WebSocket
+	//Transformation de l'http pour includre le serveur websocket en arrière-plan
 	activeConn++
 	utils.Deactivation(db)
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -135,11 +135,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() {
-		// Decrement the activeConnections counter when the connection is closed
 		activeConn--
-		// Check if there are no more active connections
+		//Si personne n'est connecté au serveur Websocket, je m'assure que tlmde soit délog.
 		if activeConn == 0 {
-			// Perform deactivation logic when there are no active connections
 			err := utils.Deactivation(db)
 			if err != nil {
 				fmt.Println("Error deactivating all users:", err)
@@ -147,8 +145,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 	}()
-	// fmt.Println("je rentre2")
-	// Boucle pour lire les messages WebSocket
+	//La boucle infinie va réceptionner les messages JS-Javascript en permanence
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
@@ -163,8 +160,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// Traitez les données en fonction du nom du formulaire
-		fmt.Println(activeConn)
-		// fmt.Println("form", nomForm.FormName, nomForm.Username)
 		switch nomForm.FormName {
 		case "register":
 			registerHandler(message)
@@ -262,7 +257,6 @@ func sendPostsToClients(conn *websocket.Conn) {
 		fmt.Println("Erreur pour chopper les données de GetPosts()!")
 		return
 	}
-	// fmt.Println(posts)
 	message := trek.PostArray{Name: "Posts", Posts: posts}
 	postData, _ := json.Marshal(message)
 	err = conn.WriteMessage(websocket.TextMessage, postData)

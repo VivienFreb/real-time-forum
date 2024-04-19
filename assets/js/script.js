@@ -73,7 +73,7 @@
         });
         
         registerBtn.addEventListener('click', function (event) {
-            event.preventDefault(); // Empêche la soumission normale du formulaire
+            event.preventDefault(); // => Empêche la soumission du formulaire.
             if (register_username.value.length <= 0 
             || register_email.value.length <= 0 
             || register_password.value.length <= 0){
@@ -91,7 +91,7 @@
             data.username = register_username.value
             currentUser = register_username.value;
 
-            // Envoyer les données via WebSocket
+            //Envoi des données dans le serveur interne
             socket.send(JSON.stringify(data));
             document.getElementById('register_username').value = null;
             document.getElementById('register_email').value = null;
@@ -102,9 +102,6 @@
             document.getElementById('User-Verif').classList.add('hidden')
             document.getElementById('content_dashboard').classList.remove('hidden')
             sidebar.classList.remove('hidden')
-            // displayPosts()
-            // socket.close()
-            // initWebSocket()
         });
         loginBtn.addEventListener('click', function (event) {
             event.preventDefault(); // Empêche la soumission normale du formulaire
@@ -188,23 +185,12 @@
 
         function displayPosts(posts) {
             const dashboardContent = document.getElementById('content_dashboard')
-            const htmlCode = `
-        <div id="quickReply" class="extPanel reply" style="right: 0px; top: 10%;">
-            <div id="qrForm">
-                <div><input name="name" type="text" placeholder="Subject"></div>
-                <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
-                <button id="postBtn">Post</button>
-            </div>
-        </div>
-    `;
-            
-
-
             const postsList = document.createElement('ul')
             posts.forEach(post => {
                 const listItem = document.createElement('li');
                 listItem.textContent = `${post.Title} - ${post.User_name} - ${post.Description}`;
-            
+                listItem.className = "post"
+
                 if (post.Comments && post.Comments.length > 0) {
                     const commentsList = document.createElement('ul');
                     post.Comments.forEach(comment => {
@@ -219,11 +205,21 @@
                 postsList.appendChild(listItem);
             });
             dashboardContent.innerHTML = '';
-            dashboardContent.innerHTML += htmlCode
+            dashboardContent.innerHTML += postCode
+            dashboardContent.innerHTML += commentCode
             dashboardContent.appendChild(postsList)
+            const comment = document.getElementById('quickComment')
+            const reply = document.getElementById('quickReply')
+
+            dashboardContent.addEventListener('click', function(event) {
+                const target = event.target;
+                if (target && target.classList.contains('post')) {
+                    comment.classList.remove('hidden')
+                }
+            });
+
             const postBtn = document.getElementById('postBtn')
             postBtn.addEventListener('click',function(){
-
                 const formData = {
                     formName: 'postCreation',
                     "Username": currentUser,
@@ -233,6 +229,22 @@
                 socket.send(JSON.stringify(formData))
                 document.querySelector('#quickReply input[name="name"]').value = ''
                 document.querySelector('#quickReply textarea[name="com"]').value = ''
+                reply.classList.add('hidden')
+                requestsPosts()
+            })
+            const commentBtn = document.getElementById('commentBtn')
+            commentBtn.addEventListener('click', ()=>{
+                const formData = {
+                    formName: 'commentCreation',
+                    "Username": currentUser,
+                    "Subject": "Placeholder",
+                    "Content": document.querySelector('#quickComment textarea[name="com"]').value
+                }
+                socket.send(JSON.stringify(formData))
+                document.querySelector('#quickComment input[name="name"]').value = ''
+                document.querySelector('#quickComment textarea[name="com"]').value = ''
+                comment.classList.add('hidden')
+                // requestsPosts()
             })
         }
 
@@ -260,6 +272,7 @@
             const newline = document.createElement('br')
             userList.appendChild(newline)
             console.log(userStatus);
+            requestsPosts()
 
             userStatus.forEach(user =>{
                 const li = document.createElement('li');
@@ -315,11 +328,22 @@
         function CheckIfNeeded(){
             if (!sidebar.classList.contains('hidden')) getStatus()
         }
-        // getStatus()
-
-        // Gërrémîe PaiLæj
-
-// Post [Title, Username, Content, []Comment]
-// Comment [CommentFrom, Username, Content]
-// 
-//         
+        
+        const postCode = `
+        <div id="quickReply" class="extPanel  hidden" style="right: 0px; top: 10%;">
+            <div id="qrForm">
+                <div><input name="name" type="text" placeholder="Subject"></div>
+                <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
+                <button id="postBtn">Post</button>
+            </div>
+        </div>
+    `;
+            
+        const commentCode = `
+            <div id="quickComment" class="extPanel reply hidden" style="right: 0px; top: 30%;">
+                <div id="qrForm">
+                    <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
+                    <button id="commentBtn">Comment</button>
+                </div>
+            </div>
+        `;
