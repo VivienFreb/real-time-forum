@@ -6,6 +6,10 @@
         let loginBtn = document.getElementById('loginBtn');
         let loginForm = document.getElementById('loginForm');
         let register_username = document.getElementById('register_username')
+        let register_first_name = document.getElementById('register_first_name')
+        let register_last_name = document.getElementById('register_last_name')
+        let register_age = document.getElementById('register_age')
+        let register_gender = document.getElementById('register_gender')
         let register_email = document.getElementById('register_email')
         let register_password = document.getElementById('register_password')
         let register_confirm_password = document.getElementById('register_confirm_password')
@@ -71,10 +75,14 @@
             event.preventDefault(); // => Empêche la soumission du formulaire.
             if (register_username.value.length <= 0 
             || register_email.value.length <= 0 
-            || register_password.value.length <= 0){
+            || register_password.value.length <= 0
+            || register_first_name.value.length <= 0
+            || register_last_name.value.length <= 0
+            || register_gender.value.length <= 0){
                 alert("L'un des champs requis est vide.")
                 return
             }
+
             const formData = new FormData(registerForm);
 
             // Convertir FormData en objet JSON
@@ -116,9 +124,6 @@
             socket.send(JSON.stringify(data));
             currentUser = login_username.value;
 
-            const sidebar = document.querySelector('.sidenav')
-            sidebar.classList.remove('hidden')
-
             login_username.value = '';
             login_password.value = '';
             requestsPosts()
@@ -142,6 +147,13 @@
                     me.textContent = currentUser
                     me.style = "color: blue"
                     document.getElementById('MyName').appendChild(me)
+                    if (friendList == null){
+                        const li = document.createElement('li')
+                        li.textContent = "Friendless"
+                        li.style.color = "red"
+                        document.getElementById('userList').appendChild(li)
+                        return
+                    }
                     friendList.forEach(user =>{
                         const li = document.createElement('li')
                         li.textContent = user.username
@@ -170,13 +182,16 @@
                 if (response.Success){
                     document.getElementById('User-Verif').classList.add('hidden')
                     document.getElementById('content_dashboard').classList.remove('hidden')
+                    const sidebar = document.querySelector('.sidenav')
+                    sidebar.classList.remove('hidden')
                  }
             } 
         })
 
         function displayPosts(posts) {
             const dashboardContent = document.getElementById('content_dashboard')
-            const postsList = document.createElement('ul')
+            if (posts != null){
+                const postsList = document.createElement('ul')
             posts.forEach(post => {
                 const listItem = document.createElement('li');
                 listItem.textContent = `${post.Title} - ${post.User_name} - ${post.Description}`;
@@ -255,6 +270,7 @@
                 // requestsPosts()
             })
         }
+    }
 
         function generateChat(discs){
             clearChatHistory()
@@ -279,6 +295,13 @@
             const newline = document.createElement('br')
             userList.appendChild(newline)
             requestsPosts()
+            if (userStatus == null){
+                const li = document.createElement('li')
+                        li.textContent = "Friendless"
+                        li.style.color = "red"
+                        document.getElementById('userList').appendChild(li)
+                        return
+            }
 
             userStatus.forEach(user =>{
                 const li = document.createElement('li');
@@ -322,7 +345,7 @@
             getChat()
         })
 
-        //Assortiment de mini-fonctions qui activent des réponses précises du Golang-Websocket.
+        //Assortiment de mini-fonctions qui activent des réponses précises du Golang-Websocket
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}
         const getUsers = () => {message = {FormName:"usershunt", "Username":`${currentUser}`};socket.send(JSON.stringify(message))}

@@ -29,12 +29,17 @@ type Denomination struct {
 	Other    string `json:"Other"`
 	Content  string `json:"Content"`
 }
+
 type FormDataRegister struct {
 	FormName        string `json:"formName"`
 	Username        string `json:"username"`
 	Email           string `json:"mail"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirm_password"`
+	Gender          string `json:"gender"`
+	Age             string `json:"age"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
 }
 
 type FormDataLogin struct {
@@ -104,7 +109,7 @@ func loginHandler(conn *websocket.Conn, message []byte) {
 			return
 		}
 	} else {
-		fmt.Println("Impossible de se connecter avec ce pseudo.")
+		fmt.Println("Impossible de se connecter avec ces informations.")
 		response := trek.LoginResponse{Success: false, Message: "Nom ou MDP invalide.", Name: "Login"}
 		responseData, err := json.Marshal(response)
 		if err != nil {
@@ -231,7 +236,7 @@ func registerHandler(message []byte) {
 		fmt.Println("Erreur lors de l'analyse des données JSON:", err)
 		return
 	}
-	utils.InsertUser(db, formData.Username, formData.Email, formData.Password, formData.ConfirmPassword)
+	utils.InsertUser(db, formData.Username, formData.Email, formData.Password, formData.ConfirmPassword, formData.FirstName, formData.LastName, formData.Gender, formData.Age)
 }
 
 func main() {

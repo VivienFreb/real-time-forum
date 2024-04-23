@@ -9,11 +9,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func InsertUser(db *sql.DB, username string, email string, password string, confirm string) {
+func InsertUser(db *sql.DB, username string, email string, password string, confirm string, firstname string, lastname string, gender string, age string) {
 	if password != confirm {
 		fmt.Println("Mots de passe différents.")
 	}
-	_, err := db.Exec("INSERT INTO Users (username, email, password, status) VALUES (?, ?, ?,?)", username, email, password, "inactive")
+	_, err := db.Exec("INSERT INTO Users (username, email, password, status, first_name, last_name, gender, age) VALUES (?,?,?,?,?,?,?,?)", username, email, password, "inactive", firstname, lastname, gender, age)
 	if err != nil {
 		fmt.Println("Impossible d'enregistrer l'utilisateur")
 	}
