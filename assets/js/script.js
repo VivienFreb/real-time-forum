@@ -25,6 +25,12 @@
         const commentBtn = document.getElementById('commentBtn')
         const comment = document.getElementById('quickComment')
         const reply = document.getElementById('quickReply')
+        const dateOptions = {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Paris', // French time zone
+        };
         let currentUser;
         let currentOther;
         let subjectPost;
@@ -159,21 +165,35 @@
                         document.getElementById('userList').appendChild(li)
                         return
                     }
-                    friendList.forEach(user =>{
-                        const li = document.createElement('li')
-                        li.textContent = user.username
-                        li.style.color = "red"
-                        document.getElementById('userList').appendChild(li)
-
+                    friendList.sort((a, b) => {
+                        if (a.LastChat === '' && b.LastChat === '') {
+                            return a.username.localeCompare(b.username); // Alphabetical sort for users without LastChat
+                        } else if (a.LastChat === '') {
+                            return 1; // Users with empty LastChat come last
+                        } else if (b.LastChat === '') {
+                            return -1; // Users with empty LastChat come last
+                        } else {
+                            return new Date(b.LastChat) - new Date(a.LastChat); // Sort by last chat time
+                        }
+                    });
+                    
+                    friendList.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = user.username;
+                        li.style.color = "red";
+                        document.getElementById('userList').appendChild(li);
+                    
                         li.addEventListener('click', function(){
-                            if (currentOther !== li.textContent){console.log("You clicked!");
-                            if (chatContainer.classList.contains('hidden')) chatContainer.classList.remove('hidden')
-                            currentOther = li.textContent
-                            getChat()
-                            document.querySelector('.dashboard').classList.add('hidden')
-                            document.querySelector('.container').classList.remove('hidden')}
-                        })
-                    })
+                            if (currentOther !== li.textContent){
+                                console.log("You clicked!");
+                                if (chatContainer.classList.contains('hidden')) chatContainer.classList.remove('hidden');
+                                currentOther = li.textContent;
+                                getChat();
+                                document.querySelector('.dashboard').classList.add('hidden');
+                                document.querySelector('.container').classList.remove('hidden');
+                            }
+                        });
+                    });
                 }
                 if (response.Name === "userStatus"){
                   updateUserStatus(response.Checks)
@@ -242,7 +262,7 @@
 
             
         }
-    }
+        }
 
         function generateChat(discs){
             clearChatHistory()
@@ -254,7 +274,8 @@
                 if (message.Speaker === currentUser){
                     chatBubble.classList.add('darker')
                 }
-                chatBubble.innerHTML = `<p><strong>${message.Speaker}:</strong> ${message.Content}</p>`;
+                const formattedDate = new Date(message.Date).toLocaleTimeString('fr-FR', dateOptions);
+                chatBubble.innerHTML = `<p><strong>${message.Speaker}:</strong> ${message.Content}<br>${formattedDate}</p>`;
                 chatContainer.appendChild(chatBubble)
                 })
             }
@@ -274,8 +295,20 @@
                         document.getElementById('userList').appendChild(li)
                         return
             }
+            userStatus.sort((a, b) => {
+                if (a.LastChat === '' && b.LastChat === '') {
+                    return a.Name.localeCompare(b.Name); // Alphabetical sort for users without messages
+                } else if (a.LastChat === '') {
+                    return 1; // Users without messages come last
+                } else if (b.LastChat === '') {
+                    return -1; // Users without messages come last
+                } else {
+                    return new Date(b.LastChat) - new Date(a.LastChat); // Sort by last chat time
+                }
+            });
 
             userStatus.forEach(user =>{
+                console.log(user.LastChat);
                 const li = document.createElement('li');
                 li.textContent = `${user.Name}`;
                 li.style.color = user.Status === 'active' ? 'green' : 'red';
@@ -308,7 +341,7 @@
                     FormName:"chatEnvoy",
                     "Username": `${currentUser}`,
                     "Other": `${currentOther}`,
-                    Content: messageContent
+                    Content: messageContent,
                 }
                 socket.send(JSON.stringify(message))
             }

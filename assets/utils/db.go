@@ -107,14 +107,27 @@ func GetFriends(db *sql.DB, currentUser string) ([]s.User, error) {
 		if err := rows.Scan(&user.Username, &user.ID, &user.Email, &user.Status); err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
+		lastChat := getLastChatTime(db, currentUser, user.Username)
+		user.LastChat = lastChat
+		fmt.Println(user.LastChat, user.Username)
 		userList = append(userList, user)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error during iteration: %v", err)
 	}
-
 	return userList, nil
+}
+
+func getLastChatTime(db *sql.DB, currentUser, friendUsername string) string {
+	var lastChatTime string
+	err := db.QueryRow(`
+		SELECT MAX(Date) FROM Discussions 
+		WHERE (Speaker = ? AND Listener = ?)`,friendUsername, currentUser).Scan(&lastChatTime)
+	if err != nil {
+		return ""
+	}
+	return lastChatTime
 }
 
 func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
@@ -129,6 +142,10 @@ func GetStatus(db *sql.DB, currentUser string) ([]s.Update, error) {
 		if err := rows.Scan(&statue.Name, &statue.Status); err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
+		var lastChat = getLastChatTime(db, currentUser, statue.Name)
+		statue.LastChat = lastChat
+		fmt.Println(statue.LastChat)
+		fmt.Println(statue.Name)
 		statusList = append(statusList, statue)
 	}
 
@@ -173,7 +190,7 @@ func Deactivation(db *sql.DB) error {
 }
 
 func GetDiscussion(db *sql.DB, currentUser string, otherUser string) ([]s.MessageInner, error) {
-	rows, err := db.Query("SELECT Speaker, Listener, Content FROM Disscussions WHERE (Speaker = ? AND Listener = ?) OR (Speaker = ? AND Listener = ?)", currentUser, otherUser, otherUser, currentUser)
+	rows, err := db.Query("SELECT Speaker, Listener, Content, Date FROM Discussions WHERE (Speaker = ? AND Listener = ?) OR (Speaker = ? AND Listener = ?)", currentUser, otherUser, otherUser, currentUser)
 	if err != nil {
 		return nil, fmt.Errorf("impossible de récupérer les discussions: %v", err)
 	}
@@ -182,7 +199,7 @@ func GetDiscussion(db *sql.DB, currentUser string, otherUser string) ([]s.Messag
 	var discussionList []s.MessageInner
 	for rows.Next() {
 		var message s.MessageInner
-		if err := rows.Scan(&message.Speaker, &message.Listener, &message.Content); err != nil {
+		if err := rows.Scan(&message.Speaker, &message.Listener, &message.Content, &message.Date); err != nil {
 			return nil, fmt.Errorf("impossible de scan une discussion: %v", err)
 		}
 		discussionList = append(discussionList, message)
@@ -194,7 +211,7 @@ func GetDiscussion(db *sql.DB, currentUser string, otherUser string) ([]s.Messag
 }
 
 func NewMessage(db *sql.DB, me string, them string, message string) {
-	_, err := db.Exec("INSERT INTO Disscussions (Speaker, Listener, Content) VALUES (?, ?, ?)", me, them, message)
+	_, err := db.Exec("INSERT INTO Discussions (Speaker, Listener, Content) VALUES (?, ?, ?)", me, them, message)
 	if err != nil {
 		fmt.Println("Impossible d'enregistrer le message.")
 	}

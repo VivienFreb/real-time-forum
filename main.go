@@ -28,6 +28,7 @@ type Denomination struct {
 	Username string `json:"Username"`
 	Other    string `json:"Other"`
 	Content  string `json:"Content"`
+	Date     string `json:"Date"`
 }
 
 type FormDataRegister struct {

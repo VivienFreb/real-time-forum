@@ -1,5 +1,7 @@
 package utils
 
+import "time"
+
 type HeaderHandler struct {
 	IsLogged bool
 	Pseudo   string
@@ -21,6 +23,7 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Status   string `json:"status"`
+	LastChat string `json:"lastchat"`
 }
 
 type LoginResponse struct {
@@ -42,6 +45,7 @@ type UsersArray struct {
 type Update struct {
 	Name   string `json:"Name"`
 	Status string `json:"Status"`
+	LastChat string `json:"LastChat"`
 }
 
 type NewStatus struct {
@@ -53,6 +57,7 @@ type MessageInner struct {
 	Speaker  string `json:"Speaker"`
 	Listener string `json:"Listener"`
 	Content  string `json:"Content"`
+	Date time.Time `json:"Date"`
 }
 
 type MessageOuter struct {

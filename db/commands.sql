@@ -17,9 +17,15 @@ CREATE TABLE IF NOT EXISTS Users (
     status TEXT
 );
 
--- UPDATE `Users` SET username = 'Bento-chan' WHERE id = 2
+CREATE TABLE IF NOT EXISTS Discussions(
+Speaker TEXT,
+Listener TEXT,
+Content TEXT,
+Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-DELETE FROM Comments
+
+-- UPDATE `Users` SET username = 'Bento-chan' WHERE id = 2
 
 -- DaBoi27 DaBoi10@ DaBoi@gmx.fr
 -- Bento-chan Bento10@ shizuka@gmx.fr
