@@ -214,3 +214,10 @@ func CreatePost(db *sql.DB, username string, subject string, content string) {
 		fmt.Println("Impossible d'ajouter le post à la database.")
 	}
 }
+
+func CommentPost(db *sql.DB, username string, post string, content string){
+	_, err := db.Exec("INSERT INTO Comments (user_name, content, parent) VALUES (?,?,?)", username, content, post)
+	if err != nil {
+		fmt.Println("Impossible d'ajouter le commentaire à la database.")
+	}
+}

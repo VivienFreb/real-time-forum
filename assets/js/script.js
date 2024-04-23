@@ -21,8 +21,13 @@
         let logoutBtn = document.getElementById('logout')
         let homeBtn = document.getElementById('homeBtn')
         let chatContainer = document.getElementById('chatContainer')
+        const postBtn = document.getElementById('postBtn')
+        const commentBtn = document.getElementById('commentBtn')
+        const comment = document.getElementById('quickComment')
+        const reply = document.getElementById('quickReply')
         let currentUser;
         let currentOther;
+        let subjectPost;
 
         logoutBtn.addEventListener('click', function(){
             dashboard_page.classList.add('hidden')
@@ -209,15 +214,6 @@
             
                 postsList.appendChild(listItem);
             });
-            const postCode = `
-            <div id="quickReply" class="extPanel  hidden" style="right: 0px; top: 10%;">
-                <div id="qrForm">
-                    <div><input name="name" type="text" placeholder="Subject"></div>
-                    <div><textarea name="com" cols="48" rows="4" placeholder="Comment"></textarea></div>
-                    <button id="postBtn">Post</button>
-                </div>
-            </div>
-        `;
                 
             const commentCode = `
                 <div id="quickComment" class="extPanel reply hidden" style="right: 0px; top: 30%;">
@@ -228,47 +224,23 @@
                 </div>
             `;
             dashboardContent.innerHTML = '';
-            dashboardContent.innerHTML += postCode
-            dashboardContent.innerHTML += commentCode
             dashboardContent.appendChild(postsList)
             const comment = document.getElementById('quickComment')
             const reply = document.getElementById('quickReply')
 
             dashboardContent.addEventListener('click', function(event) {
                 const target = event.target;
+                console.log(target.textContent);
                 if (target && target.classList.contains('post')) {
                     comment.classList.remove('hidden')
+                    const postText = target.textContent; // Get the text content of the clicked post
+                    const subjectIndex = postText.indexOf('-'); // Find the index of the first '-'
+                    const subject = postText.slice(0, subjectIndex).trim(); 
+                    subjectPost = subject;
                 }
             });
 
-            const postBtn = document.getElementById('postBtn')
-            postBtn.addEventListener('click',function(){
-                const formData = {
-                    formName: 'postCreation',
-                    "Username": currentUser,
-                    "Subject": document.querySelector('#quickReply input[name="name"]').value,
-                    "Content": document.querySelector('#quickReply textarea[name="com"]').value
-                }
-                socket.send(JSON.stringify(formData))
-                document.querySelector('#quickReply input[name="name"]').value = ''
-                document.querySelector('#quickReply textarea[name="com"]').value = ''
-                reply.classList.add('hidden')
-                requestsPosts()
-            })
-            const commentBtn = document.getElementById('commentBtn')
-            commentBtn.addEventListener('click', ()=>{
-                const formData = {
-                    formName: 'commentCreation',
-                    "Username": currentUser,
-                    "Subject": "Placeholder",
-                    "Content": document.querySelector('#quickComment textarea[name="com"]').value
-                }
-                socket.send(JSON.stringify(formData))
-                document.querySelector('#quickComment input[name="name"]').value = ''
-                document.querySelector('#quickComment textarea[name="com"]').value = ''
-                comment.classList.add('hidden')
-                // requestsPosts()
-            })
+            
         }
     }
 
@@ -345,6 +317,33 @@
             getChat()
         })
 
+            postBtn.addEventListener('click',function(){
+                const formData = {
+                    formName: 'postCreation',
+                    "Username": currentUser,
+                    "Subject": document.querySelector('#quickReply input[name="name"]').value,
+                    "Content": document.querySelector('#quickReply textarea[name="com"]').value
+                }
+                socket.send(JSON.stringify(formData))
+                document.querySelector('#quickReply input[name="name"]').value = ''
+                document.querySelector('#quickReply textarea[name="com"]').value = ''
+                reply.classList.add('hidden')
+                requestsPosts()
+            })
+
+            commentBtn.addEventListener('click', () => {
+                const formData = {
+                    formName: 'commentCreation',
+                    "Username": currentUser,
+                    "Subject": subjectPost, // Set the subject from the extracted text
+                    "Content": document.querySelector('#quickComment textarea[name="com"]').value
+                }
+                console.log(formData);
+                socket.send(JSON.stringify(formData))
+                document.querySelector('#quickComment textarea[name="com"]').value = ''
+                comment.classList.add('hidden')
+                requestsPosts()
+            })
         //Assortiment de mini-fonctions qui activent des réponses précises du Golang-Websocket
         const requestsPosts = () => {message = {FormName: "posts"};socket.send(JSON.stringify(message))}
         const rebootStatus = () => {message = {FormName: "reset"};socket.send(JSON.stringify(message))}

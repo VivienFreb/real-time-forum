@@ -200,7 +200,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(nomForm.Other)
 			discussionHandler(conn, nomForm)
 		case "chatEnvoy":
-			fmt.Println("Etape 2")
 			fmt.Println(nomForm)
 			utils.NewMessage(db, nomForm.Username, nomForm.Other, nomForm.Content)
 		case "delog":
@@ -208,6 +207,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		case "postCreation":
 			json.Unmarshal(message, &postForm)
 			utils.CreatePost(db, postForm.Username, postForm.Subject, postForm.Content)
+		case "commentCreation":
+			json.Unmarshal(message, &postForm)
+			utils.CommentPost(db, postForm.Username, postForm.Subject, postForm.Content)
 		default:
 			fmt.Println("Nom de formulaire non reconnu:", nomForm.FormName)
 		}

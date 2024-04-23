@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS Users (
     status TEXT
 );
 
-UPDATE `Users` SET username = 'Bento-chan' WHERE id = 2
+-- UPDATE `Users` SET username = 'Bento-chan' WHERE id = 2
+
+DELETE FROM Comments
 
 -- DaBoi27 DaBoi10@ DaBoi@gmx.fr
 -- Bento-chan Bento10@ shizuka@gmx.fr
